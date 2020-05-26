@@ -16,7 +16,7 @@ public class ChatMessage {
         this.receiverId = receiverId;
         this.timeStamp = timeStamp;
     }
-//liron
+//liron-naor-oriel-or
     public String getTextMessage() {
         return textMessage;
     }
