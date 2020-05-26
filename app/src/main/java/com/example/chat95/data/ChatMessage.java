@@ -16,7 +16,7 @@ public class ChatMessage {
         this.receiverId = receiverId;
         this.timeStamp = timeStamp;
     }
-//liron-naor-oriel-or
+//team
     public String getTextMessage() {
         return textMessage;
     }
@@ -25,8 +25,9 @@ public class ChatMessage {
         this.textMessage = textMessage;
     }
 
-    public String getSenderId() {
-        return senderId;
+    public int getSenderId() {
+       // return senderId;
+        return 5;
     }
 
     public void setSenderId(String senderId) {
