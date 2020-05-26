@@ -9,7 +9,7 @@ public class ChatMessage {
     public ChatMessage() {
 
     }
-
+//hello naor whats up
     public ChatMessage(String textMessage, String senderId, String receiverId, String timeStamp) {
         this.textMessage = textMessage;
         this.senderId = senderId;
