@@ -25,9 +25,8 @@ public class ChatMessage {
         this.textMessage = textMessage;
     }
 
-    public int getSenderId() {
-       // return senderId;
-        return 5;
+    public String getSenderId() {
+        return senderId;
     }
 
     public void setSenderId(String senderId) {
