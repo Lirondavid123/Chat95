@@ -16,7 +16,7 @@ public class ChatMessage {
         this.receiverId = receiverId;
         this.timeStamp = timeStamp;
     }
-
+//hara
     public String getTextMessage() {
         return textMessage;
     }
