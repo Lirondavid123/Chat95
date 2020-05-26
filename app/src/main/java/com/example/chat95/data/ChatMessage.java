@@ -16,7 +16,7 @@ public class ChatMessage {
         this.receiverId = receiverId;
         this.timeStamp = timeStamp;
     }
-
+//liron
     public String getTextMessage() {
         return textMessage;
     }
