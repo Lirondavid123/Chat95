@@ -37,7 +37,7 @@ public class ChatActivity extends AppCompatActivity {
     private ValueEventListener userDetailsListener;
     private static UsersViewModel mViewModel;
     private static FirebaseAuth fireBaseAuth;
-
+ 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
