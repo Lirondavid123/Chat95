@@ -17,6 +17,7 @@ import com.example.chat95.R;
 import com.example.chat95.data.User;
 import com.example.chat95.databinding.ActivityChatBinding;
 import com.example.chat95.login.LoginActivity;
+import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -42,6 +43,7 @@ public class ChatActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        FirebaseApp.initializeApp(this);
         fireBaseAuth = FirebaseAuth.getInstance();
         currentUser = fireBaseAuth.getCurrentUser();
         binding = ActivityChatBinding.inflate(getLayoutInflater());
