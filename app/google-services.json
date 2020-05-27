@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "1094494243009",
+    "firebase_url": "https://chat95-c8844.firebaseio.com",
+    "project_id": "chat95-c8844",
+    "storage_bucket": "chat95-c8844.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1094494243009:android:61e752b379b2e90bda6c40",
+        "android_client_info": {
+          "package_name": "com.example.chat95"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1094494243009-b3rl9n2n77bvnhcppg7sfnf95io06ltc.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.chat95",
+            "certificate_hash": "7c7521bc258ccdf90e42c43cc9d7745e4f57b0ff"
+          }
+        },
+        {
+          "client_id": "1094494243009-3l9ldprh43ohb2sl221b9hunm12skmn9.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDxtY2xXSBjxPvIKo3DLf7-Mh67iTjyQ84"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1094494243009-3l9ldprh43ohb2sl221b9hunm12skmn9.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
