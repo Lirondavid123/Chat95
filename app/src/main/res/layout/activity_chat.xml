@@ -6,26 +6,8 @@
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
     app:statusBarBackground="@color/ic_launcher_background"
-    tools:context=".ui.chatactivity.ChatActivity">
+    tools:context=".chatactivity.ChatActivity">
 
-<!--    <com.google.android.material.appbar.AppBarLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:theme="@style/AppTheme.PopupOverlay">
-
-        <androidx.appcompat.widget.Toolbar
-            android:id="@+id/chat_toolbar"
-            android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:background="?attr/colorPrimary"
-            app:titleTextColor="#FFFFFF"
-            android:focusable="true"
-            android:focusableInTouchMode="true"
-            android:textDirection="ltr"
-            android:backgroundTint="@color/ic_launcher_background"
-            app:popupTheme="@style/AppTheme.PopupOverlay">
-        </androidx.appcompat.widget.Toolbar>
-    </com.google.android.material.appbar.AppBarLayout>-->
 
 <include layout="@layout/content_chat_activity"></include>
 
