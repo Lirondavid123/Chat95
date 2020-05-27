@@ -8,12 +8,11 @@
     android:background="#F5F0F0"
     android:orientation="vertical"
 
-    tools:context=".ui.login.LoginActivity">
+    tools:context=".login.LoginActivity">
 
     <fragment
         android:id="@+id/loginActivityContainer"
-        android:name="com.example.besocial.ui.login.LoginFragment"
+        android:name="com.example.chat95.login.LoginFragment"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        app:navGraph="@navigation/mobile_navigation"/>
+        android:layout_height="match_parent" />
 </FrameLayout>

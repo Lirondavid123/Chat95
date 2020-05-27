@@ -1,3 +1,30 @@
 <resources>
     <string name="app_name">Chat95</string>
+
+
+
+    <string name="logout">Logout</string>
+    <string name="are_you_sure_you_want_to_logout">Are you sure you want to logout?</string>
+    <string name="title_activity_login">Sign in</string>
+    <string name="prompt_email">Email</string>
+    <string name="prompt_password">Password</string>
+    <string name="action_login">Login</string>
+    <string name="action_sign_in_short">Sign in</string>
+    <string name="welcome">"Welcome !"</string>
+    <string name="invalid_username">Not a valid username</string>
+    <string name="invalid_password">Password must be >5 characters</string>
+    <string name="login_failed">"Login failed"</string>
+    <string name="action_register">Register</string>
+    <string name="remember_my_email_and_password">Remember my email and password</string>
+
+
+    <string name="registration">Registration</string>
+    <string name="confirm_password">Confirm password</string>
+    <string name="confirm_email">Confirm email</string>
+    <string name="first_name">First name</string>
+    <string name="last_name">Last name</string>
+    <string name="clear_fields">Clear Fields</string>
+    <string name="create_account">Create Account</string>
+    <string name="search_person_here">Search person here</string>
+    <string name="username">username</string>
 </resources>
