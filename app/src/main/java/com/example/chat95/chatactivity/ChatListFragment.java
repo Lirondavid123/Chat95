@@ -90,21 +90,25 @@ public class ChatListFragment extends Fragment {
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getContext());
         binding.chatListRecycler.setLayoutManager(linearLayoutManager);
 
+/*
         callingIntent = ChatActivity.callingIntent;
         ChatActivity.callingIntent = null;
         if (callingIntent != null && callingIntent.getStringExtra("chosenUid") != null) {
             Bundle bundle = callingIntent.getExtras();
+*/
 /*            loggedUserId = intent.getStringExtra(ConstantValues.LOGGED_USER_ID);
-            chosenId = intent.getStringExtra("chosenUid");*/
+            chosenId = intent.getStringExtra("chosenUid");*//*
+
             showChatConversation(bundle);
         }else prepareDatabaseQuery();
+*/
 
     }
 
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        chatViewModel = ViewModelProviders.of(getActivity()).get(ChatViewModel.class);
+//        chatViewModel = ViewModelProviders.of(getActivity()).get(ChatViewModel.class);
     }
 
     private void showChatConversation(Bundle bundle) {

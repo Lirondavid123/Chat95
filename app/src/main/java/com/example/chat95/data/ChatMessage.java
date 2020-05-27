@@ -9,13 +9,14 @@ public class ChatMessage {
     public ChatMessage() {
 
     }
+
     public ChatMessage(String textMessage, String senderId, String receiverId, String timeStamp) {
         this.textMessage = textMessage;
         this.senderId = senderId;
         this.receiverId = receiverId;
         this.timeStamp = timeStamp;
     }
-//hara
+
     public String getTextMessage() {
         return textMessage;
     }

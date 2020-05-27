@@ -1,6 +1,8 @@
 package com.example.chat95.data;
 
 
+import com.google.firebase.database.Exclude;
+
 public class User {
     private String userId;
     private String userFirstName;
@@ -60,7 +62,7 @@ public class User {
         this.profileImage = profileImage;
     }
 
-
+@Exclude
     public String getUserFullName() {
         return String.format("%s %s", userFirstName, userLastName);
     }
