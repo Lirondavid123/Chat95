@@ -3,8 +3,6 @@ package com.example.chat95.chatactivity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.ImageButton;
@@ -39,10 +37,11 @@ public class ChatActivity extends AppCompatActivity {
     private static FirebaseUser currentUser;
     public static Intent callingIntent;
     private ValueEventListener userDetailsListener;
-    private static UsersViewModel mViewModel;
+    private static UsersViewModel usersViewModel;
     private static FirebaseAuth fireBaseAuth;
     private ImageButton search_users_button;
- 
+    private ChatViewModel mChatViewModel;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -59,7 +58,8 @@ public class ChatActivity extends AppCompatActivity {
         navController = Navigation.findNavController(this, R.id.chat_nav_host_fragment);
         AppBarConfiguration appBarConfiguration =
                 new AppBarConfiguration.Builder(navController.getGraph()).build();
-        mViewModel = ViewModelProviders.of(this).get(UsersViewModel.class);
+        usersViewModel = ViewModelProviders.of(this).get(UsersViewModel.class);
+        mChatViewModel = ViewModelProviders.of(this).get(ChatViewModel.class);
 
     }
 
@@ -88,9 +88,8 @@ public class ChatActivity extends AppCompatActivity {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                     loggedUser = dataSnapshot.getValue(User.class);
-                    mViewModel.setUser(loggedUser);
+                    usersViewModel.setUser(loggedUser);
                     String myProfileImage = loggedUser.getProfileImage();
-                    loggedUser = dataSnapshot.getValue(User.class);
                 }
 
                 @Override
@@ -119,12 +118,12 @@ public class ChatActivity extends AppCompatActivity {
         return loggedUser;
     }
 
-    public static UsersViewModel getmViewModel() {
-        return mViewModel;
+    public static UsersViewModel getUsersViewModel() {
+        return usersViewModel;
     }
 
-    public static void setmViewModel(UsersViewModel mViewModel) {
-        ChatActivity.mViewModel = mViewModel;
+    public static void setUsersViewModel(UsersViewModel usersViewModel) {
+        ChatActivity.usersViewModel = usersViewModel;
     }
     public static FirebaseAuth getFireBaseAuth() {
         return fireBaseAuth;

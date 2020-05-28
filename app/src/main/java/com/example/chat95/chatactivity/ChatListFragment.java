@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -48,7 +49,7 @@ public class ChatListFragment extends Fragment {
     private static String TAG = "ChatListFragment";
 
     private FragmentChatListBinding binding;
-    private static UsersViewModel mViewModel;
+    private static UsersViewModel usersViewModel;
     private RecyclerView chatListRecycler;
     private Query query;
     private User loggedUser;
@@ -100,15 +101,16 @@ public class ChatListFragment extends Fragment {
             chosenId = intent.getStringExtra("chosenUid");*//*
 
             showChatConversation(bundle);
-        }else prepareDatabaseQuery();
+        }else
 */
-
+        prepareDatabaseQuery();
     }
 
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-//        chatViewModel = ViewModelProviders.of(getActivity()).get(ChatViewModel.class);
+        chatViewModel = ViewModelProviders.of(getActivity()).get(ChatViewModel.class);
+        usersViewModel = ViewModelProviders.of(getActivity()).get(UsersViewModel.class);
     }
 
     private void showChatConversation(Bundle bundle) {
@@ -163,7 +165,12 @@ public class ChatListFragment extends Fragment {
                     @Override
                     public void onClick(View v) {
                         chatViewModel.setChosenChatConversation(model);
-                        Navigation.findNavController(getView()).navigate(R.id.action_chatListFragment_to_chatConversationFragment);
+                        usersViewModel.setUserId(model.getChosenUid());
+                        usersViewModel.setChosenPhotoUrl(model.getReceiverProfilePicture());
+                        usersViewModel.setUserName(model.getUserName());
+                        Bundle bundle=new Bundle();
+                        bundle.putBoolean("doesConversationExist",true);
+                        Navigation.findNavController(getView()).navigate(R.id.action_chatListFragment_to_chatConversationFragment,bundle);
                     }
                 });
             }
@@ -186,7 +193,26 @@ public class ChatListFragment extends Fragment {
 
         }
     }
+    /**
+     * handles app bar menu items selection
+     *
+     * @param item -user's selection
+     * @return boolean
+     */
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
 
+//     handles logout
+        switch (item.getItemId()) {
+            case R.id.logout:
+//                new LogoutDialog("Logging out").show(getSupportFragmentManager(), null);
+                Navigation.findNavController(getView()).navigate(R.id.logoutDialog);
+                return true;
+
+            default:
+                return super.onContextItemSelected(item);
+        }
+    }
     @Override
     public void onDestroy() {
         super.onDestroy();

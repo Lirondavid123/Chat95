@@ -7,6 +7,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProviders;
+import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -62,7 +63,7 @@ public class SearchUsersFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        mViewModel = ViewModelProviders.of(getActivity()).get(UsersViewModel.class);
+
         searchedUsersRecycler=view.findViewById(R.id.searched_users_recycler);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getContext());
         linearLayoutManager.setReverseLayout(true);
@@ -72,6 +73,11 @@ public class SearchUsersFragment extends Fragment {
         setBarListener();
         searchBar.setText("");
     }
+
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        mViewModel = ViewModelProviders.of(getActivity()).get(UsersViewModel.class);    }
 
     @Override
     public void onStop() {
@@ -155,17 +161,15 @@ public class SearchUsersFragment extends Fragment {
                 //holder.userNode = model;
                 Log.d("SearchUsersFragment","On bind");
                 if(model==null){
-                    //Toast.makeText(getActivity(),"nothing to show", Toast.LENGTH_SHORT).show();
                 }
                 else{
-                    //Toast.makeText(getActivity(), model.toString(), Toast.LENGTH_SHORT).show();
                 }
                 Glide.with(getActivity()).load(model.getProfileImage()).placeholder(R.drawable.empty_profile_image).into(holder.userPhoto);
                 holder.userName.setText(model.getUserFirstName()+" "+model.getUserLastName());
                 holder.itemView.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-
+                        openChatConversation(model);
                     }
                 });
             }
@@ -175,6 +179,14 @@ public class SearchUsersFragment extends Fragment {
         firebaseRecyclerAdapter.startListening();
     }
 
+    private void openChatConversation(User model) {
+        mViewModel.setUserId(model.getUserId());
+        mViewModel.setChosenPhotoUrl(model.getProfileImage());
+        mViewModel.setUserName(model.getUserFullName());
+        Bundle bundle=new Bundle();
+        bundle.putBoolean("doesConversationExist",false);
+        Navigation.findNavController(getView()).navigate(R.id.chatConversationFragment,bundle);
+    }
 
 
     public static class SearchedUsersViewHolder extends RecyclerView.ViewHolder {
