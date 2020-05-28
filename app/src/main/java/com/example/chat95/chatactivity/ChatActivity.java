@@ -3,8 +3,11 @@ package com.example.chat95.chatactivity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.ImageButton;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -38,6 +41,7 @@ public class ChatActivity extends AppCompatActivity {
     private ValueEventListener userDetailsListener;
     private static UsersViewModel mViewModel;
     private static FirebaseAuth fireBaseAuth;
+    private ImageButton search_users_button;
  
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,12 +55,20 @@ public class ChatActivity extends AppCompatActivity {
         setContentView(view);
         callingIntent=getIntent();
 
+
         navController = Navigation.findNavController(this, R.id.chat_nav_host_fragment);
         AppBarConfiguration appBarConfiguration =
                 new AppBarConfiguration.Builder(navController.getGraph()).build();
         mViewModel = ViewModelProviders.of(this).get(UsersViewModel.class);
+
     }
 
+ /*   @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater menuInflater= getMenuInflater();
+        menuInflater.inflate(R.menu.menu,menu);
+        return true;
+    }*/
 
     @Override
     protected void onStart() {
@@ -67,6 +79,8 @@ public class ChatActivity extends AppCompatActivity {
         }
         //
         else {
+            search_users_button=findViewById(R.id.search_users_button);
+            setListeners();
 
             currentUserDatabaseRef = FirebaseDatabase.getInstance().getReference().child("users").child(fireBaseAuth.getUid());
 
@@ -119,4 +133,14 @@ public class ChatActivity extends AppCompatActivity {
     public static FirebaseUser getCurrentUser() {
         return currentUser;
     }
+
+    void setListeners(){
+        search_users_button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                navController.navigate(R.id.action_chatListFragment_to_searchUsersFragment);
+            }
+        });
+    }
+
 }

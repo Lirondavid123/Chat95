@@ -24,9 +24,22 @@
             android:backgroundTint="@color/ic_launcher_background"
             android:focusable="true"
             android:focusableInTouchMode="true"
-            android:textDirection="ltr"
+            android:layoutDirection="ltr"
+            android:textDirection="rtl"
             app:popupTheme="@style/AppTheme.PopupOverlay"
-            app:titleTextColor="#FFFFFF"></androidx.appcompat.widget.Toolbar>
+            app:titleTextColor="#FFFFFF">
+
+            <ImageButton
+                android:id="@+id/search_users_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="140dp"
+                android:src="@drawable/ic_search_black_24dp">
+
+            </ImageButton>
+        </androidx.appcompat.widget.Toolbar>
+
+
     </com.google.android.material.appbar.AppBarLayout>
 
     <androidx.recyclerview.widget.RecyclerView
