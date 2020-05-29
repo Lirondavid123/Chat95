@@ -64,6 +64,11 @@ public class ConversationEntity {
         return SymmetricKey;
     }
 
+
+    public void setUid(String uid) {
+        this.uid = uid;
+    }
+
     public void setMyprivateKey(String myprivateKey) {
         this.myprivateKey = myprivateKey;
     }
