@@ -8,6 +8,7 @@ import android.util.Log;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.navigation.NavController;
+import androidx.navigation.Navigation;
 
 import com.example.chat95.utils.MyBroadcastReceiver;
 import com.example.chat95.R;

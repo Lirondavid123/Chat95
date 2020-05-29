@@ -77,6 +77,7 @@ public class ChatConversation {
     public void setChosenUid(String chosenUid) {
         this.chosenUid = chosenUid;
     }
+    //
 }
 
 

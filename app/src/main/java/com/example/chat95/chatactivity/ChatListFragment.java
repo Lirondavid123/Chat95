@@ -3,9 +3,15 @@ package com.example.chat95.chatactivity;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.ColorStateList;
+import android.graphics.Color;
+import android.graphics.PorterDuff;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -48,7 +54,7 @@ public class ChatListFragment extends Fragment {
     private static String TAG = "ChatListFragment";
 
     private FragmentChatListBinding binding;
-    private static UsersViewModel mViewModel;
+    private static UsersViewModel usersViewModel;
     private RecyclerView chatListRecycler;
     private Query query;
     private User loggedUser;
@@ -66,6 +72,10 @@ public class ChatListFragment extends Fragment {
         // Required empty public constructor
     }
 
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -89,6 +99,7 @@ public class ChatListFragment extends Fragment {
 
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getContext());
         binding.chatListRecycler.setLayoutManager(linearLayoutManager);
+        binding.chatToolbar.getOverflowIcon().setColorFilter(Color.WHITE , PorterDuff.Mode.SRC_ATOP);
 
 /*
         callingIntent = ChatActivity.callingIntent;
@@ -100,20 +111,34 @@ public class ChatListFragment extends Fragment {
             chosenId = intent.getStringExtra("chosenUid");*//*
 
             showChatConversation(bundle);
-        }else prepareDatabaseQuery();
+        }else
 */
+        setListeners();
+        prepareDatabaseQuery();
+    }
 
+    private void setListeners() {
+        binding.chatToolbar.getMenu().getItem(0).setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                navController.navigate(R.id.logoutDialog);
+                return false;
+            }
+        });
+        binding.searchUsersButton.setOnClickListener(Navigation.createNavigateOnClickListener(R.id.action_chatListFragment_to_searchUsersFragment));
     }
 
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-//        chatViewModel = ViewModelProviders.of(getActivity()).get(ChatViewModel.class);
+        chatViewModel = ViewModelProviders.of(getActivity()).get(ChatViewModel.class);
+        usersViewModel = ViewModelProviders.of(getActivity()).get(UsersViewModel.class);
     }
 
     private void showChatConversation(Bundle bundle) {
         Navigation.findNavController(getView()).navigate(R.id.action_chatListFragment_to_chatConversationFragment, bundle);
     }
+
     private void prepareDatabaseQuery() {
         final Query conversationsRef = FirebaseDatabase.getInstance().getReference()
                 .child(ConstantValues.CHAT_CONVERSATIONS).child(ChatActivity.getFireBaseAuth().getUid());
@@ -163,7 +188,12 @@ public class ChatListFragment extends Fragment {
                     @Override
                     public void onClick(View v) {
                         chatViewModel.setChosenChatConversation(model);
-                        Navigation.findNavController(getView()).navigate(R.id.action_chatListFragment_to_chatConversationFragment);
+                        usersViewModel.setUserId(model.getChosenUid());
+                        usersViewModel.setChosenPhotoUrl(model.getReceiverProfilePicture());
+                        usersViewModel.setUserName(model.getUserName());
+                        Bundle bundle = new Bundle();
+                        bundle.putBoolean("doesConversationExist", true);
+                        Navigation.findNavController(getView()).navigate(R.id.action_chatListFragment_to_chatConversationFragment, bundle);
                     }
                 });
             }

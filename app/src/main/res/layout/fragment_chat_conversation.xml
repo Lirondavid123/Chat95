@@ -25,6 +25,7 @@
             android:focusable="true"
             android:focusableInTouchMode="true"
             android:textDirection="ltr"
+            app:theme="@style/ToolbarTheme"
             app:popupTheme="@style/AppTheme.PopupOverlay"
             app:titleTextColor="#FFFFFF">
 
