@@ -51,15 +51,13 @@ public class LogoutDialog extends DialogFragment {
         AlertDialog.Builder dlg = new AlertDialog.Builder(getActivity());
         View myLayout = getActivity().getLayoutInflater().inflate(R.layout.fragment_logout_dialog, null);
         Bundle bndl = getArguments();
-        String title = bndl.getString("TitleKey", "Logging out");
-        dlg.setTitle(title);
+//        String title = bndl.getString("TitleKey", "Logging out");
+        dlg.setTitle("Loggin out");
         dlg.setView(myLayout);
         dlg.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
-                //android.os.Process.killProcess(android.os.Process.myPid());
-                firebaseAuth.signOut();
-                //(MainActivity)getActivity().
+                ChatActivity.getFireBaseAuth().signOut();
                 Intent intent = new Intent((ChatActivity) getActivity(), LoginActivity.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 startActivity(intent);

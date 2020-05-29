@@ -27,7 +27,7 @@
         android:name="com.example.chat95.chatactivity.SearchUsersFragment"
         android:label="fragment_search_users"
         tools:layout="@layout/fragment_search_users" />
-    <fragment
+    <dialog
         android:id="@+id/logoutDialog"
         android:name="com.example.chat95.chatactivity.LogoutDialog"
         android:label="LogoutDialog" />

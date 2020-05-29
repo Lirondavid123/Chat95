@@ -65,7 +65,6 @@ public class LoginFragment extends Fragment {
         register = view.findViewById(R.id.register);
         login = view.findViewById(R.id.login);
         login.setEnabled(true);
-        passwordVisibilityImageview=view.findViewById(R.id.visibility_imageview);
         progressDialog=new ProgressDialog(getActivity());
         progressDialog.setTitle("Loading... Please wait");
         forgotPassword=view.findViewById(R.id.forgot_password);
@@ -91,7 +90,6 @@ public class LoginFragment extends Fragment {
         View.OnClickListener clickListener = new ClickListener();
         login.setOnClickListener(clickListener);
         forgotPassword.setOnClickListener(clickListener);
-        passwordVisibilityImageview.setOnClickListener(clickListener);
         register.setOnClickListener(clickListener);
     }
 

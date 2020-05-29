@@ -1,6 +1,8 @@
 package com.example.chat95.chatactivity;
 
 
+import android.graphics.Color;
+import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.text.Editable;
@@ -112,6 +114,8 @@ public class ChatConversationFragment extends Fragment {
         chosenUid = mUsersViewModel.getUserId();
         photoUrl = mUsersViewModel.getChosenPhotoUrl();
         userName = mUsersViewModel.getUserName();
+        initToolBar();
+        binding.chatToolbar.getOverflowIcon().setColorFilter(Color.WHITE , PorterDuff.Mode.SRC_ATOP);
         Bundle bundle = getArguments();
 
         if (!bundle.getBoolean("doesConversationExist")) {
@@ -165,7 +169,6 @@ public class ChatConversationFragment extends Fragment {
 
         isConversationApproved = chosenChatConversation.isApproved();
         setConversationApproval(isConversationApproved, chosenChatConversation.getSender());
-        initToolBar();
         prepareDatabaseQuery();
 //        }
     }
@@ -356,6 +359,7 @@ public class ChatConversationFragment extends Fragment {
                 dbRef.updateChildren(childUpdates).addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
+                        doesConversationExist=true;
                         prepareDatabaseQuery();
                     }
                 });

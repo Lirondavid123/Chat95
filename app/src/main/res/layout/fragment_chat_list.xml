@@ -27,13 +27,14 @@
             android:layoutDirection="ltr"
             android:textDirection="rtl"
             app:popupTheme="@style/AppTheme.PopupOverlay"
+            app:menu="@menu/menu"
             app:titleTextColor="#FFFFFF">
 
             <ImageButton
                 android:id="@+id/search_users_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="140dp"
+                android:layout_marginLeft="0dp"
                 android:src="@drawable/ic_search_black_24dp">
 
             </ImageButton>

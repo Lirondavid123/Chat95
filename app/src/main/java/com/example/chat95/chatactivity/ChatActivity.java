@@ -3,6 +3,9 @@ package com.example.chat95.chatactivity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.ImageButton;
@@ -63,7 +66,7 @@ public class ChatActivity extends AppCompatActivity {
 
     }
 
- /*   @Override
+/*    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater menuInflater= getMenuInflater();
         menuInflater.inflate(R.menu.menu,menu);
@@ -134,12 +137,13 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     void setListeners(){
-        search_users_button.setOnClickListener(new View.OnClickListener() {
+/*        search_users_button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 navController.navigate(R.id.action_chatListFragment_to_searchUsersFragment);
             }
-        });
+        });*/
     }
+
 
 }
