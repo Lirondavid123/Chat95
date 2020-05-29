@@ -230,7 +230,11 @@ public class Des {
         // get round keys
         String keys[] = getKeys(key);
 
-        // initial permutation
+
+        /**
+         * initial permutation
+         * reassamble the bits according to the Initial Permutation (IP) matrix
+         */
         plainText = permutation(IP, plainText);
         System.out.println(
                 "After initial permutation: "
@@ -283,6 +287,7 @@ public class Des {
         plainText = permutation(IP1, plainText);
         return plainText;
     }
+
 }
 
 
