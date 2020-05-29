@@ -250,6 +250,12 @@ public class ChatConversationFragment extends Fragment {
             public void onClick(View v) {
                 binding.declineBtn.setEnabled(false);
                 binding.approveBtn.setEnabled(false);
+                // TODO: 29/05/2020 delete after adding the cloud function  
+                //
+                binding.approveMessageLayout.setVisibility(View.GONE);
+                binding.chatUserInput.setVisibility(View.VISIBLE);
+                binding.chatConversationSendBtn.setVisibility(View.VISIBLE);
+                //
                 // TODO: 28/05/2020 edit the cloud function approveChatConversation for this project
 /*                approveChatConversation().addOnCompleteListener(new OnCompleteListener<String>() {
                     @Override
