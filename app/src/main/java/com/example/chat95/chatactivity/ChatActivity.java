@@ -86,7 +86,7 @@ public class ChatActivity extends AppCompatActivity {
         Des des=new Des();
         String resultText;
         String myKey= KeyGenerator.generateKey(16);
-        resultText=des.encryptOnce("abcdefghijklmnop",myKey);
+        resultText=des.encryptOnce("abcdefghijklmnop","AABB09182736CCDD");
         Log.d(TAG, "onStart: encryptOne: "+resultText);
         //resultText= Des.encrypt("Hi my name is or",myKey);
         Log.d(TAG, "inside on Start");

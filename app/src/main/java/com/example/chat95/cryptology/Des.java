@@ -109,8 +109,8 @@ public class Des {
     String hextoBin(String input)
     {
         int n = input.length() * 4;
-        long val=Long.parseUnsignedLong(input, 16);
-        input = Long.toBinaryString(val);
+        input = Long.toBinaryString(
+                Long.parseUnsignedLong(input, 16));
         while (input.length() < n)
             input = "0" + input;
         return input;
@@ -236,11 +236,7 @@ public class Des {
         // get round keys
         String keys[] = getKeys(key);
 
-
-        /**
-         * initial permutation
-         * reassamble the bits according to the Initial Permutation (IP) matrix
-         */
+        // initial permutation
         plainText = permutation(IP, plainText);
         System.out.println(
                 "After initial permutation: "
@@ -265,7 +261,7 @@ public class Des {
         return plainText;
     }
 
-    String decryptOnce(String plainText, String key)
+    String decrypt(String plainText, String key)
     {
         int i;
         // get round keys
@@ -293,6 +289,7 @@ public class Des {
         plainText = permutation(IP1, plainText);
         return plainText;
     }
+
 
     public static String encrypt(String plainText,String key){
         Log.d(TAG, "Des: encrypt: PlainText: "+plainText);
