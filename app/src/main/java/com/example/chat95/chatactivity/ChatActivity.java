@@ -18,6 +18,7 @@ import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 
 import com.example.chat95.R;
+import com.example.chat95.cryptology.TextSplitter;
 import com.example.chat95.data.User;
 import com.example.chat95.databinding.ActivityChatBinding;
 import com.example.chat95.login.LoginActivity;
@@ -29,6 +30,8 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+
+import java.util.List;
 
 
 public class ChatActivity extends AppCompatActivity {
@@ -76,6 +79,7 @@ public class ChatActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
+
         Log.d(TAG, "inside on Start");
         if (fireBaseAuth.getCurrentUser()== null) {    // if the user is not logged in
             sendUserToLogin();
