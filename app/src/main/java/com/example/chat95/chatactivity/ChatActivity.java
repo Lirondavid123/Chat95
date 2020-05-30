@@ -18,6 +18,9 @@ import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 
 import com.example.chat95.R;
+import com.example.chat95.cryptology.Des;
+import com.example.chat95.cryptology.KeyGenerator;
+import com.example.chat95.cryptology.TestDes;
 import com.example.chat95.cryptology.TextSplitter;
 import com.example.chat95.data.User;
 import com.example.chat95.databinding.ActivityChatBinding;
@@ -79,7 +82,13 @@ public class ChatActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
-
+        //Log.d(TAG, "onStart: toHextString Test:  "+Long.toHexString());
+        Des des=new Des();
+        String resultText;
+        String myKey= KeyGenerator.generateKey(16);
+        resultText=des.encryptOnce("abcdefghijklmnop",myKey);
+        Log.d(TAG, "onStart: encryptOne: "+resultText);
+        //resultText= Des.encrypt("Hi my name is or",myKey);
         Log.d(TAG, "inside on Start");
         if (fireBaseAuth.getCurrentUser()== null) {    // if the user is not logged in
             sendUserToLogin();

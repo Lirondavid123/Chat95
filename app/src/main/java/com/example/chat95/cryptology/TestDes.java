@@ -2,12 +2,10 @@ package com.example.chat95.cryptology;
 
 import android.util.Log;
 
-import java.util.List;
-
 import static androidx.constraintlayout.widget.Constraints.TAG;
 
-public class Des {
-    // Initial Permutation Table
+public class TestDes {
+    // Initial Permutation Table 
     int[] IP = { 58, 50, 42, 34, 26, 18,
             10, 2, 60, 52, 44, 36, 28, 20,
             12, 4, 62, 54, 46, 38,
@@ -19,7 +17,7 @@ public class Des {
             37, 29, 21, 13, 5, 63, 55,
             47, 39, 31, 23, 15, 7 };
 
-    // Inverse Initial Permutation Table
+    // Inverse Initial Permutation Table 
     int[] IP1 = { 40, 8, 48, 16, 56, 24, 64,
             32, 39, 7, 47, 15, 55,
             23, 63, 31, 38, 6, 46,
@@ -32,7 +30,7 @@ public class Des {
             26, 33, 1, 41, 9, 49,
             17, 57, 25 };
 
-    // first key-hePermutation Table
+    // first key-hePermutation Table 
     int[] PC1 = { 57, 49, 41, 33, 25,
             17, 9, 1, 58, 50, 42, 34, 26,
             18, 10, 2, 59, 51, 43, 35, 27,
@@ -42,7 +40,7 @@ public class Des {
             53, 45, 37, 29, 21, 13, 5, 28,
             20, 12, 4 };
 
-    // second key-Permutation Table
+    // second key-Permutation Table 
     int[] PC2 = { 14, 17, 11, 24, 1, 5, 3,
             28, 15, 6, 21, 10, 23, 19, 12,
             4, 26, 8, 16, 7, 27, 20, 13, 2,
@@ -50,7 +48,7 @@ public class Des {
             51, 45, 33, 48, 44, 49, 39, 56,
             34, 53, 46, 42, 50, 36, 29, 32 };
 
-    // Expansion D-box Table
+    // Expansion D-box Table 
     int[] EP = { 32, 1, 2, 3, 4, 5, 4,
             5, 6, 7, 8, 9, 8, 9, 10,
             11, 12, 13, 12, 13, 14, 15,
@@ -59,14 +57,14 @@ public class Des {
             24, 25, 26, 27, 28, 29, 28,
             29, 30, 31, 32, 1 };
 
-    // Straight Permutation Table
+    // Straight Permutation Table 
     int[] P = { 16, 7, 20, 21, 29, 12, 28,
             17, 1, 15, 23, 26, 5, 18,
             31, 10, 2, 8, 24, 14, 32,
             27, 3, 9, 19, 13, 30, 6,
             22, 11, 4, 25 };
 
-    // S-box Table
+    // S-box Table 
     int[][][] sbox = {
             { { 14, 4, 13, 1, 2, 15, 11, 8, 3, 10, 6, 12, 5, 9, 0, 7 },
                     { 0, 15, 7, 4, 14, 2, 13, 1, 10, 6, 12, 11, 9, 5, 3, 8 },
@@ -105,18 +103,18 @@ public class Des {
     int[] shiftBits = { 1, 1, 2, 2, 2, 2, 2, 2,
             1, 2, 2, 2, 2, 2, 2, 1 };
 
-    // hexadecimal to binary conversion
+    // hexadecimal to binary conversion 
     String hextoBin(String input)
     {
         int n = input.length() * 4;
-        long val=Long.parseUnsignedLong(input, 16);
-        input = Long.toBinaryString(val);
+        input = Long.toBinaryString(
+                Long.parseUnsignedLong(input, 16));
         while (input.length() < n)
             input = "0" + input;
         return input;
     }
 
-    // binary to hexadecimal conversion
+    // binary to hexadecimal conversion 
     String binToHex(String input)
     {
         int n = (int)input.length() / 4;
@@ -127,8 +125,8 @@ public class Des {
         return input;
     }
 
-    // per-mutate input hexadecimal
-    // according to specified sequence
+    // per-mutate input hexadecimal 
+    // according to specified sequence 
     String permutation(int[] sequence, String input)
     {
         String output = "";
@@ -139,24 +137,24 @@ public class Des {
         return output;
     }
 
-    // xor 2 hexadecimal strings
+    // xor 2 hexadecimal strings 
     String xor(String a, String b)
     {
-        // hexadecimal to decimal(base 10)
+        // hexadecimal to decimal(base 10) 
         long t_a = Long.parseUnsignedLong(a, 16);
-        // hexadecimal to decimal(base 10)
+        // hexadecimal to decimal(base 10) 
         long t_b = Long.parseUnsignedLong(b, 16);
-        // xor
+        // xor 
         t_a = t_a ^ t_b;
-        // decimal to hexadecimal
+        // decimal to hexadecimal 
         a = Long.toHexString(t_a);
-        // prepend 0's to maintain length
+        // prepend 0's to maintain length 
         while (a.length() < b.length())
             a = "0" + a;
         return a;
     }
 
-    // left Circular Shifting bits
+    // left Circular Shifting bits 
     String leftCircularShift(String input, int numBits)
     {
         int n = input.length() * 4;
@@ -169,24 +167,24 @@ public class Des {
         return input;
     }
 
-    // preparing 16 keys for 16 rounds
+    // preparing 16 keys for 16 rounds 
     String[] getKeys(String key)
     {
         String keys[] = new String[16];
-        // first key permutation
+        // first key permutation 
         key = permutation(PC1, key);
         for (int i = 0; i < 16; i++) {
             key = leftCircularShift(
                     key.substring(0, 7), shiftBits[i])
                     + leftCircularShift(key.substring(7, 14),
                     shiftBits[i]);
-            // second key permutation
+            // second key permutation 
             keys[i] = permutation(PC2, key);
         }
         return keys;
     }
 
-    // s-box lookup
+    // s-box lookup 
     String sBox(String input)
     {
         String output = "";
@@ -206,19 +204,19 @@ public class Des {
 
     String round(String input, String key, int num)
     {
-        // fk
+        // fk 
         String left = input.substring(0, 8);
         String temp = input.substring(8, 16);
         String right = temp;
-        // Expansion permutation
+        // Expansion permutation 
         temp = permutation(EP, temp);
-        // xor temp and round key
+        // xor temp and round key 
         temp = xor(temp, key);
-        // lookup in s-box table
+        // lookup in s-box table 
         temp = sBox(temp);
-        // Straight D-box
+        // Straight D-box 
         temp = permutation(P, temp);
-        // xor
+        // xor 
         left = xor(left, temp);
         System.out.println("Round "
                 + (num + 1) + " "
@@ -226,21 +224,17 @@ public class Des {
                 + " " + left.toUpperCase() + " "
                 + key.toUpperCase());
 
-        // swapper
+        // swapper 
         return right + left;
     }
 
-    public String encryptOnce(String plainText, String key)
+    String encrypt(String plainText, String key)
     {
         int i;
-        // get round keys
+        // get round keys 
         String keys[] = getKeys(key);
 
-
-        /**
-         * initial permutation
-         * reassamble the bits according to the Initial Permutation (IP) matrix
-         */
+        // initial permutation 
         plainText = permutation(IP, plainText);
         System.out.println(
                 "After initial permutation: "
@@ -251,27 +245,27 @@ public class Des {
                         + " R0="
                         + plainText.substring(8, 16).toUpperCase() + "\n");
 
-        // 16 rounds
+        // 16 rounds 
         for (i = 0; i < 16; i++) {
             plainText = round(plainText, keys[i], i);
         }
 
-        // 32-bit swap
+        // 32-bit swap 
         plainText = plainText.substring(8, 16)
                 + plainText.substring(0, 8);
 
-        // final permutation
+        // final permutation 
         plainText = permutation(IP1, plainText);
         return plainText;
     }
 
-    String decryptOnce(String plainText, String key)
+    String decrypt(String plainText, String key)
     {
         int i;
-        // get round keys
+        // get round keys 
         String keys[] = getKeys(key);
 
-        // initial permutation
+        // initial permutation 
         plainText = permutation(IP, plainText);
         System.out.println(
                 "After initial permutation: "
@@ -282,31 +276,32 @@ public class Des {
                         + " R0=" + plainText.substring(8, 16).toUpperCase()
                         + "\n");
 
-        // 16-rounds
+        // 16-rounds 
         for (i = 15; i > -1; i--) {
             plainText = round(plainText, keys[i], 15 - i);
         }
 
-        // 32-bit swap
+        // 32-bit swap 
         plainText = plainText.substring(8, 16)
                 + plainText.substring(0, 8);
         plainText = permutation(IP1, plainText);
         return plainText;
     }
 
-    public static String encrypt(String plainText,String key){
-        Log.d(TAG, "Des: encrypt: PlainText: "+plainText);
-        Des des=new Des();
-        String encrypedText="";
-        List<String> splittedPlainText= TextSplitter.split(plainText,16);
-        while(!splittedPlainText.isEmpty()){
-            encrypedText=encrypedText.concat(des.encryptOnce(splittedPlainText.get(0),key));
-            splittedPlainText.remove(0);
-        }
-        Log.d(TAG, "Des: encrypt: encrypted Text: "+encrypedText);
-        return encrypedText;
+    public static void main(String args[])
+    {
+        String text = "123456ABCD132536";
+        String key = "AABB09182736CCDD";
+
+        TestDes cipher = new TestDes();
+        System.out.println("Encryption:\n");
+        text = cipher.encrypt(text, key);
+        System.out.println(
+                "\nCipher Text: " + text.toUpperCase() + "\n");
+        Log.d(TAG, "main: Decryption\n");
+        text = cipher.decrypt(text, key);
+        Log.d(TAG, "main: mytest: \"\\nPlain Text: \"\n" +
+                "                        + text.toUpperCase()");
     }
-
 }
-
 
