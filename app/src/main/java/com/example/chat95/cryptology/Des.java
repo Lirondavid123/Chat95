@@ -1,7 +1,6 @@
 package com.example.chat95.cryptology;
 
 import android.util.Log;
-
 import java.util.List;
 
 import static androidx.constraintlayout.widget.Constraints.TAG;
