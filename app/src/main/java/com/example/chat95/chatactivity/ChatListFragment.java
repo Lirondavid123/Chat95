@@ -99,7 +99,7 @@ public class ChatListFragment extends Fragment {
 
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getContext());
         binding.chatListRecycler.setLayoutManager(linearLayoutManager);
-        binding.chatToolbar.getOverflowIcon().setColorFilter(Color.WHITE , PorterDuff.Mode.SRC_ATOP);
+        binding.chatToolbar.getOverflowIcon().setColorFilter(Color.WHITE, PorterDuff.Mode.SRC_ATOP);
 
 /*
         callingIntent = ChatActivity.callingIntent;
@@ -152,7 +152,9 @@ public class ChatListFragment extends Fragment {
                         firebaseRecyclerAdapter.stopListening();
                     }
                 } else {
-                    displayConversationsList(binding.chatListRecycler, conversationsRef);
+                    if (binding != null || binding.chatListRecycler != null) {
+                        displayConversationsList(binding.chatListRecycler, conversationsRef);
+                    }
                 }
             }
 

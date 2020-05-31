@@ -260,7 +260,7 @@ public class Des {
         return plainText;
     }
 
-    String decrypt(String plainText, String key)
+    public String decrypt(String plainText, String key)
     {
         int i;
         // get round keys

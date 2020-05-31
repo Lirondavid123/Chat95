@@ -92,6 +92,8 @@ public class ChatActivity extends AppCompatActivity {
         Log.d(TAG, "onStart: encryptOne: "+resultText);
         //resultText= Des.encrypt("Hi my name is or",myKey);
         Log.d(TAG, "inside on Start");
+        String decrypted=des.decrypt(resultText,key);
+        Log.d(TAG, "onStart: decrypted: "+decrypted);
         if (fireBaseAuth.getCurrentUser()== null) {    // if the user is not logged in
             sendUserToLogin();
         }

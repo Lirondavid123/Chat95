@@ -229,10 +229,8 @@ public class ChatConversationFragment extends Fragment {
                 binding.declineBtn.setVisibility(View.GONE);
                 binding.infoAboutConversationApproval.setText("Waiting for the other side's approval");
                 binding.approveMessageLayout.setVisibility(View.VISIBLE);
-// TODO: 31/05/2020 remove comment, this is for debug 
-//                createNewConversationInDB();
-
-
+// TODO: 31/05/2020 uncomment this
+                createNewConversationInDB();
 /*                startNewChatConversation().addOnCompleteListener(new OnCompleteListener<String>() {
                     @Override
                     public void onComplete(@NonNull Task<String> task) {
@@ -251,17 +249,18 @@ public class ChatConversationFragment extends Fragment {
                 });*/
             }
         });
+
         binding.approveBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 binding.declineBtn.setEnabled(false);
                 binding.approveBtn.setEnabled(false);
-                // TODO: 29/05/2020 delete after adding the cloud function  
-                //
+                // TODO: 29/05/2020 delete after adding the cloud function
                 binding.approveMessageLayout.setVisibility(View.GONE);
                 binding.chatUserInput.setVisibility(View.VISIBLE);
                 binding.chatConversationSendBtn.setVisibility(View.VISIBLE);
                 //
+
                 // TODO: 28/05/2020 edit the cloud function approveChatConversation for this project
 /*                approveChatConversation().addOnCompleteListener(new OnCompleteListener<String>() {
                     @Override
