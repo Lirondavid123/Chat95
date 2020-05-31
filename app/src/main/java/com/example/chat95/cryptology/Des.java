@@ -108,6 +108,7 @@ public class Des {
     // hexadecimal to binary conversion
     String hextoBin(String input)
     {
+        Log.d(TAG, "hextoBin: input in hex: "+convertAsciiToHex(input));
         int n = input.length() * 4;
         input = Long.toBinaryString(
                 Long.parseUnsignedLong(input, 16));
@@ -261,8 +262,10 @@ public class Des {
         return plainText;
     }
 
-    String decrypt(String plainText, String key)
+    public String decryptOnce(String plainText, String key)
     {
+        //Log.d(TAG, "Des: decryptOnce: CipherText: "+plainText);
+
         int i;
         // get round keys
         String keys[] = getKeys(key);
@@ -287,6 +290,7 @@ public class Des {
         plainText = plainText.substring(8, 16)
                 + plainText.substring(0, 8);
         plainText = permutation(IP1, plainText);
+        //Log.d(TAG, "Des: decrypt: decrypted Text: "+plainText);
         return plainText;
     }
 
@@ -295,13 +299,59 @@ public class Des {
         Log.d(TAG, "Des: encrypt: PlainText: "+plainText);
         Des des=new Des();
         String encrypedText="";
-        List<String> splittedPlainText= TextSplitter.split(plainText,16);
+        String keyInHex=des.convertAsciiToHex(key);
+        List<String> splittedPlainText= TextSplitter.split(plainText,8);
         while(!splittedPlainText.isEmpty()){
-            encrypedText=encrypedText.concat(des.encryptOnce(splittedPlainText.get(0),key));
+            //Log.d(TAG, "Des: encrypt: splitted Plaintext: "+plainText);
+            encrypedText=encrypedText.concat(des.encryptOnce(des.convertAsciiToHex(splittedPlainText.get(0)),keyInHex));
             splittedPlainText.remove(0);
         }
+        encrypedText=des.convertHexToAscii(encrypedText);
         Log.d(TAG, "Des: encrypt: encrypted Text: "+encrypedText);
         return encrypedText;
+    }
+
+    public static String decrypt(String cipherText,String key){
+        String plainText="",cipherTextInHex;
+        Des des=new Des();
+        Log.d(TAG, "Des: decrypt: CipherText: "+cipherText);
+        String keyInHex=des.convertAsciiToHex(key);
+        //Log.d(TAG, "Des: decrypt: key in hex: "+keyInHex);
+        cipherTextInHex=des.convertAsciiToHex(cipherText);
+        List<String> splittedCipherText= TextSplitter.split(cipherTextInHex,16);
+        while(!splittedCipherText.isEmpty()) {
+            //Log.d(TAG, "Des: decrypt: splitted CipherText: "+des.convertAsciiToHex(splittedCipherText.get(0)));
+            plainText = plainText.concat(des.decryptOnce(splittedCipherText.get(0), keyInHex));
+            splittedCipherText.remove(0);
+        }
+        plainText=des.convertHexToAscii(plainText);
+        Log.d(TAG, "Des: decrypt: PlainText: "+plainText);
+        return plainText;
+    }
+
+    public String convertAsciiToHex(String s){
+
+        char[] ch = s.toCharArray();
+
+        // Step-2 Iterate over char array and cast each element to Integer.
+        StringBuilder builder = new StringBuilder();
+
+        for (char c : ch) {
+            int i = (int) c;
+            // Step-3 Convert integer value to hex using toHexString() method.
+            builder.append(Integer.toHexString(i).toUpperCase());
+        }
+        return builder.toString();
+    }
+    public String convertHexToAscii(String hexStr) {
+        StringBuilder output = new StringBuilder("");
+
+        for (int i = 0; i < hexStr.length(); i += 2) {
+            String str = hexStr.substring(i, i + 2);
+            output.append((char) Integer.parseInt(str, 16));
+        }
+
+        return output.toString();
     }
 
 }

@@ -84,10 +84,13 @@ public class ChatActivity extends AppCompatActivity {
         super.onStart();
         //Log.d(TAG, "onStart: toHextString Test:  "+Long.toHexString());
         Des des=new Des();
+        //String key="Abuft63a";
+        String text = "encryption try number ONE";
         String resultText;
-        String myKey= KeyGenerator.generateKey(16);
-        resultText=des.encryptOnce("abcdefghijklmnop","AABB09182736CCDD");
-        Log.d(TAG, "onStart: encryptOne: "+resultText);
+        String myKey= KeyGenerator.generateKey(8);
+        resultText=Des.encrypt(text,myKey);
+        resultText=Des.decrypt(resultText,myKey);
+        //Log.d(TAG, "onStart: encryptOne: "+resultText);
         //resultText= Des.encrypt("Hi my name is or",myKey);
         Log.d(TAG, "inside on Start");
         if (fireBaseAuth.getCurrentUser()== null) {    // if the user is not logged in
