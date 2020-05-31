@@ -115,70 +115,49 @@ public class ChatConversationFragment extends Fragment {
         photoUrl = mUsersViewModel.getChosenPhotoUrl();
         userName = mUsersViewModel.getUserName();
         initToolBar();
-        binding.chatToolbar.getOverflowIcon().setColorFilter(Color.WHITE , PorterDuff.Mode.SRC_ATOP);
+        binding.chatToolbar.getOverflowIcon().setColorFilter(Color.WHITE, PorterDuff.Mode.SRC_ATOP);
         Bundle bundle = getArguments();
 
         if (!bundle.getBoolean("doesConversationExist")) {
-            //conversation might not exists
-            doesConversationExist=false;
+            //user seleceted this conversation with search option,conversation might not exist
+            doesConversationExist = false;
             checkIfConversationExists();
         } else {
-            //conversation exist
-            doesConversationExist=true;
+            //user selected this conversation in the chat list, conversation exists
+            doesConversationExist = true;
             getConversationDetails(chatViewModel.getChosenChatConversation().getValue());
         }
     }
 
     private void getConversationDetails(ChatConversation chatConversation) {
-
-
-        //conversation was chosen from main activity
-/*//        if (bundle != null) {
-        if (bundle != null && chatViewModel.getChosenChatConversation().getValue() == null) {
-            Log.d(TAG, "getConversationDetails: bundel is not null");
-            chosenUid = bundle.getString("chosenUid", null);
-
-
-            DatabaseReference userPhotoRef = dbRef
-                    .child(ConstantValues.USERS)
-                    .child(chosenUid);
-            userPhotoRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                    photoUrl = (String) dataSnapshot.child(ConstantValues.PROFILE_PHOTO).getValue();
-                    userName = String.format("%s %s",
-                            dataSnapshot.child(ConstantValues.USER_FIRST_NAME).getValue().toString(), dataSnapshot.child(ConstantValues.USER_LAST_NAME).getValue().toString());
-                    initToolBar();
-                    checkIfConversationExists();
-                }
-
-                @Override
-                public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                }
-            });
-            //conversation was chosen from conversations list, the view model is initialized
-        } else {*/
         Boolean isConversationApproved;
-        String sender;
-
-
         chosenChatConversation = chatConversation;
-        conversationId = chosenChatConversation.getChatId();
-
-
+        conversationId = chosenChatConversation.getConversationId();
         isConversationApproved = chosenChatConversation.isApproved();
         setConversationApproval(isConversationApproved, chosenChatConversation.getSender());
-        prepareDatabaseQuery();
+        if (isConversationApproved) {
+            prepareDatabaseQuery();
+        }
+
 //        }
     }
 
+    private void setStartConversationButton() {
+        binding.chatConversationRecyclerview.setVisibility(View.INVISIBLE);
+        binding.chatUserInput.setVisibility(View.GONE);
+        binding.startConversationBtn.setVisibility(View.VISIBLE);
+    }
+
     private void setConversationApproval(Boolean isConversationApproved, String sender) {
-        if (!isConversationApproved && sender.equals(chosenUid)) {
+        //the user needs to approve/decline the conversation
+        if (!isConversationApproved) {
             binding.chatUserInput.setVisibility(View.GONE);
             binding.approveMessageLayout.setVisibility(View.VISIBLE);
-        } else if (!isConversationApproved) {
-            // TODO: 21/05/2020
+            if (!sender.equals(chosenUid)) {
+                binding.approveBtn.setVisibility(View.GONE);
+                binding.declineBtn.setVisibility(View.GONE);
+                binding.infoAboutConversationApproval.setText("Waiting for the other side's approval");
+            }
         }
     }
 
@@ -188,21 +167,16 @@ public class ChatConversationFragment extends Fragment {
         userConversationRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                //conversation does not exsit
+                //conversation does not exist
                 if (!dataSnapshot.hasChild(chosenUid)) {
                     Log.d(TAG, "onDataChange: conversation does not exist");
                     doesConversationExist = false;
+                    setStartConversationButton();
                 } //conversation exists
                 else {
-
                     doesConversationExist = true;
-/*                    Boolean isConversationApproved = (Boolean) dataSnapshot.child(chosenUid).child(ConstantValues.APPROVED).getValue();
-                    String sender = (String) dataSnapshot.child(chosenUid).child("sender").getValue();
-                    setConversationApproval(isConversationApproved, sender);
-                    conversationId = (String) dataSnapshot.child(chosenUid).child(ConstantValues.CHAT_ID).getValue();*/
-                    Log.d(TAG, "onDataChange: conversation exist, conversation id: "+dataSnapshot.child(chosenUid).getValue(ChatConversation.class).getChatId());
+                    Log.d(TAG, "onDataChange: conversation exist, conversation id: " + dataSnapshot.child(chosenUid).getValue(ChatConversation.class).getConversationId());
                     getConversationDetails(dataSnapshot.child(chosenUid).getValue(ChatConversation.class));
-//                    prepareDatabaseQuery();
                 }
             }
 
@@ -245,6 +219,38 @@ public class ChatConversationFragment extends Fragment {
                 sendMessage();
             }
         });
+        binding.startConversationBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(getContext(), "New conversation request sent, waiting for other's side approval", Toast.LENGTH_LONG).show();
+                binding.startConversationBtn.setVisibility(View.GONE);
+                binding.chatUserInput.setVisibility(View.GONE);
+                binding.approveBtn.setVisibility(View.GONE);
+                binding.declineBtn.setVisibility(View.GONE);
+                binding.infoAboutConversationApproval.setText("Waiting for the other side's approval");
+                binding.approveMessageLayout.setVisibility(View.VISIBLE);
+// TODO: 31/05/2020 remove comment, this is for debug 
+//                createNewConversationInDB();
+
+
+/*                startNewChatConversation().addOnCompleteListener(new OnCompleteListener<String>() {
+                    @Override
+                    public void onComplete(@NonNull Task<String> task) {
+                        if (task.isSuccessful()) {
+                            binding.startConversationBtn.setVisibility(View.GONE);
+                            binding.chatUserInput.setVisibility(View.GONE);
+                            binding.approveMessageLayout.setVisibility(View.VISIBLE);
+                            binding.infoAboutConversationApproval.setText("Waiting for the other side's approval");
+                            Toast.makeText(getActivity(), "Conversation invitation sent! Waiting for the other side's approval...", Toast.LENGTH_LONG).show();
+                        } else {
+                            String errorMessage = task.getException().getMessage();
+                            Log.d(TAG, "onComplete: task not succeful starting conversation " + errorMessage);
+                            Toast.makeText(getActivity(), "sorry something went bad...try again later", Toast.LENGTH_LONG).show();
+                        }
+                    }
+                });*/
+            }
+        });
         binding.approveBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -278,6 +284,30 @@ public class ChatConversationFragment extends Fragment {
         });
     }
 
+    private Task<String> startNewChatConversation() {
+
+        // Create the arguments to the callable function.
+        Map<String, Object> data = new HashMap<>();
+        data.put("senderId", ChatActivity.getFireBaseAuth().getUid());
+        data.put("senderName", ChatActivity.getLoggedUser().getUserFullName());
+        data.put("receiverName", userName);
+        data.put("receiverId", chosenUid);
+
+        return mFunctions
+                .getHttpsCallable("approveChatConversation")
+                .call(data)
+                .continueWith(new Continuation<HttpsCallableResult, String>() {
+                    @Override
+                    public String then(@NonNull Task<HttpsCallableResult> task) throws Exception {
+                        // This continuation runs on either success or failure, but if the task
+                        // has failed then getResult() will throw an Exception which will be
+                        // propagated down.
+                        String result = (String) task.getResult().getData();
+                        return result;
+                    }
+                });
+    }
+
     private Task<String> approveChatConversation() {
 
         // Create the arguments to the callable function.
@@ -305,13 +335,13 @@ public class ChatConversationFragment extends Fragment {
         final String textMessage = binding.chatUserInput.getText().toString();
         binding.chatUserInput.setText("");
 
-        final Map<String, Object> childUpdates = new HashMap<>();
+//        final Map<String, Object> childUpdates = new HashMap<>();
         if (!doesConversationExist) {
             Log.d(TAG, "sendMessage: conversation does not exist");
-            createNewConversationInDB(childUpdates, textMessage);
+            createNewConversationInDB();
         } else {
             Log.d(TAG, "sendMessage: conversation exists");
-            addMessage(textMessage, chosenChatConversation.getChatId());
+            addMessage(textMessage, chosenChatConversation.getConversationId());
         }
     }
 
@@ -326,28 +356,51 @@ public class ChatConversationFragment extends Fragment {
         binding.chatConversationRecyclerview.scrollToPosition(firebaseRecyclerAdapter.getItemCount() - 1);
     }
 
-    private void createNewConversationInDB(final Map<String, Object> childUpdates, String textMessage) {
+    //    private void createNewConversationInDB(final Map<String, Object> childUpdates, String textMessage) {
+    private void createNewConversationInDB() {
+        final Map<String, Object> childUpdates = new HashMap<>();
         dbRef = FirebaseDatabase.getInstance().getReference();
         conversationId = dbRef.child(ConstantValues.CHAT_MESSAGES).push().getKey();
-        String newMessageId = dbRef.child(ConstantValues.CHAT_MESSAGES).child(conversationId).push().getKey();
+
+
+/*        String newMessageId = dbRef.child(ConstantValues.CHAT_MESSAGES).child(conversationId).push().getKey();
 
         ChatMessage chatMessage = new ChatMessage(textMessage,
                 ChatActivity.getLoggedUser().getUserId(),
                 chosenUid,
-                DateUtils.getCurrentTimeString());
-        String userName = String.format("%s %s", ChatActivity.getLoggedUser().getUserFirstName(), ChatActivity.getLoggedUser().getUserLastName());
+                DateUtils.getCurrentTimeString());*/
+
+
         chosenChatConversation = new ChatConversation(conversationId,
+                ChatActivity.getFireBaseAuth().getUid(),
+                chosenUid,
+                ChatActivity.getLoggedUser().getProfileImage(), false, ChatActivity.getLoggedUser().getUserFullName(), ChatActivity.getFireBaseAuth().getUid());
+
+
+//        childUpdates.put(String.format("/%s/%s/%s", ConstantValues.CHAT_MESSAGES, conversationId, newMessageId), chatMessage);
+        childUpdates.put(String.format("/%s/%s/%s", ConstantValues.CHAT_CONVERSATIONS, chosenUid, ChatActivity.getCurrentUser().getUid()), chosenChatConversation);
+
+        ChatConversation chatConversation = new ChatConversation(conversationId,
                 ChatActivity.getLoggedUser().getUserId(),
                 chosenUid,
-                ChatActivity.getLoggedUser().getProfileImage(), false, userName, ChatActivity.getCurrentUser().getUid());
-        chatViewModel.setChosenChatConversation(chosenChatConversation);
-
-        childUpdates.put(String.format("/%s/%s/%s", ConstantValues.CHAT_MESSAGES, conversationId, newMessageId), chatMessage);
-        childUpdates.put(String.format("/%s/%s/%s", ConstantValues.CHAT_CONVERSATIONS, chosenUid, ChatActivity.getCurrentUser().getUid()), chosenChatConversation);
-        DatabaseReference userPhotoRef = dbRef
+                photoUrl, false, userName, chosenUid);
+        chatViewModel.setChosenChatConversation(chatConversation);
+        childUpdates.put(String.format("/%s/%s/%s",
+                ConstantValues.CHAT_CONVERSATIONS
+                , ChatActivity.getCurrentUser().getUid()
+                , chosenUid)
+                , chatConversation);
+        dbRef.updateChildren(childUpdates).addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void aVoid) {
+                doesConversationExist = true;
+//                        prepareDatabaseQuery();
+            }
+        });
+/*        DatabaseReference userPhotoRef = dbRef
                 .child(ConstantValues.USERS)
-                .child(chosenUid);
-        userPhotoRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                .child(chosenUid);*/
+      /*  userPhotoRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 String photoUrl = (String) dataSnapshot.child(ConstantValues.PROFILE_PHOTO).getValue();
@@ -365,8 +418,8 @@ public class ChatConversationFragment extends Fragment {
                 dbRef.updateChildren(childUpdates).addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
-                        doesConversationExist=true;
-                        prepareDatabaseQuery();
+                        doesConversationExist = true;
+//                        prepareDatabaseQuery();
                     }
                 });
             }
@@ -376,6 +429,7 @@ public class ChatConversationFragment extends Fragment {
 
             }
         });
+*/
     }
 
     private void prepareDatabaseQuery() {

@@ -67,6 +67,19 @@
 
     </com.google.android.material.appbar.AppBarLayout>
 
+    <Button
+        android:id="@+id/start_conversation_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Start conversation"
+        android:backgroundTint="#0D47A1"
+        android:textColor="#000000"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/appBarLayout" />
+
     <AutoCompleteTextView
         android:id="@+id/chat_user_input"
         android:layout_width="0dp"
@@ -118,7 +131,7 @@
         app:layout_constraintStart_toStartOf="parent">
 
         <TextView
-            android:id="@+id/textView4"
+            android:id="@+id/info_about_conversation_approval"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
@@ -145,9 +158,9 @@
             android:background="#00FF13"
             android:text="Approve"
             android:textSize="11sp"
-            app:layout_constraintBottom_toBottomOf="@+id/textView4"
+            app:layout_constraintBottom_toBottomOf="@+id/info_about_conversation_approval"
             app:layout_constraintStart_toEndOf="@+id/decline_btn"
-            app:layout_constraintTop_toTopOf="@+id/textView4"
+            app:layout_constraintTop_toTopOf="@+id/info_about_conversation_approval"
             app:layout_constraintVertical_bias="1.0" />
 
         <Button
@@ -159,9 +172,9 @@
             android:background="#FF0000"
             android:text="Decline"
             android:textSize="11sp"
-            app:layout_constraintBottom_toBottomOf="@id/textView4"
+            app:layout_constraintBottom_toBottomOf="@id/info_about_conversation_approval"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/textView4" />
+            app:layout_constraintTop_toTopOf="@+id/info_about_conversation_approval" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 
