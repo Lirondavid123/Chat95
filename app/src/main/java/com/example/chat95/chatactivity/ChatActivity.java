@@ -87,7 +87,7 @@ public class ChatActivity extends AppCompatActivity {
         //String key="Abuft63a";
         String text = "encryption try number ONE";
         String resultText;
-        String myKey= KeyGenerator.generateKey(8);
+        String myKey= KeyGenerator.generateKey(16);
         resultText=Des.encrypt(text,myKey);
         resultText=Des.decrypt(resultText,myKey);
         //Log.d(TAG, "onStart: encryptOne: "+resultText);

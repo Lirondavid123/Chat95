@@ -299,11 +299,11 @@ public class Des {
         Log.d(TAG, "Des: encrypt: PlainText: "+plainText);
         Des des=new Des();
         String encrypedText="";
-        String keyInHex=des.convertAsciiToHex(key);
+        String keyInHex=des.convertAsciiToHex(key);  // problematic
         List<String> splittedPlainText= TextSplitter.split(plainText,8);
         while(!splittedPlainText.isEmpty()){
             //Log.d(TAG, "Des: encrypt: splitted Plaintext: "+plainText);
-            encrypedText=encrypedText.concat(des.encryptOnce(des.convertAsciiToHex(splittedPlainText.get(0)),keyInHex));
+            encrypedText=encrypedText.concat(des.encryptOnce(des.convertAsciiToHex(splittedPlainText.get(0)),key));
             splittedPlainText.remove(0);
         }
         encrypedText=des.convertHexToAscii(encrypedText);
@@ -321,7 +321,7 @@ public class Des {
         List<String> splittedCipherText= TextSplitter.split(cipherTextInHex,16);
         while(!splittedCipherText.isEmpty()) {
             //Log.d(TAG, "Des: decrypt: splitted CipherText: "+des.convertAsciiToHex(splittedCipherText.get(0)));
-            plainText = plainText.concat(des.decryptOnce(splittedCipherText.get(0), keyInHex));
+            plainText = plainText.concat(des.decryptOnce(splittedCipherText.get(0), key));
             splittedCipherText.remove(0);
         }
         plainText=des.convertHexToAscii(plainText);
