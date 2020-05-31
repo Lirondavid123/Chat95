@@ -324,10 +324,11 @@ public class Des {
         String keyInHex=des.convertAsciiToHex(key);
         //Log.d(TAG, "Des: decrypt: key in hex: "+keyInHex);
         cipherTextInHex=des.convertAsciiToHex(cipherText);
-        List<String> splittedCipherText= TextSplitter.split(cipherTextInHex,16);
+        List<String> splittedCipherText= TextSplitter.split(cipherText,8);
+        //List<String> splittedCipherText= String.s
         while(!splittedCipherText.isEmpty()) {
-            //Log.d(TAG, "Des: decrypt: splitted CipherText: "+des.convertAsciiToHex(splittedCipherText.get(0)));
-            plainText = plainText.concat(des.decryptOnce(splittedCipherText.get(0), key));
+            Log.d(TAG, "Des: decrypt: splitted CipherText length: "+splittedCipherText.get(0).length());
+            plainText = plainText.concat(des.decryptOnce(des.convertAsciiToHex(splittedCipherText.get(0)), key));
             splittedCipherText.remove(0);
         }
         plainText=des.convertHexToAscii(plainText);
