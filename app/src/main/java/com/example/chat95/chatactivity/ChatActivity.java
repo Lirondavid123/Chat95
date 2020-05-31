@@ -85,11 +85,11 @@ public class ChatActivity extends AppCompatActivity {
         //Log.d(TAG, "onStart: toHextString Test:  "+Long.toHexString());
         Des des=new Des();
         //String key="Abuft63a";
-        String text = "encryption try number ONE";
+        String text = "mynameisOR";
         String resultText;
         String myKey= KeyGenerator.generateKey(16);
-        resultText=Des.encrypt(text,myKey);
-        resultText=Des.decrypt(resultText,myKey);
+        resultText=Des.encrypt(text,"AABB09182736CCDD");
+        resultText=Des.decrypt(resultText,"AABB09182736CCDD");
         //Log.d(TAG, "onStart: encryptOne: "+resultText);
         //resultText= Des.encrypt("Hi my name is or",myKey);
         Log.d(TAG, "inside on Start");

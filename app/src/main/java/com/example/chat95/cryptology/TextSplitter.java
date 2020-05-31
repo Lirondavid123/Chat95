@@ -40,7 +40,7 @@ public class TextSplitter {
         if(lengh%n !=0){
             for(i=0; i<(n-(lengh%n));i++){
 
-                result=result+"0";
+                result=result+" ";
             }
         }
         Log.d(TAG, "after fix Text: "+result);

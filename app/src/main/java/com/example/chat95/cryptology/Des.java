@@ -8,7 +8,7 @@ import static androidx.constraintlayout.widget.Constraints.TAG;
 
 public class Des {
     // Initial Permutation Table
-    int[] IP = { 58, 50, 42, 34, 26, 18,
+    static int[] IP = { 58, 50, 42, 34, 26, 18,
             10, 2, 60, 52, 44, 36, 28, 20,
             12, 4, 62, 54, 46, 38,
             30, 22, 14, 6, 64, 56,
@@ -20,7 +20,7 @@ public class Des {
             47, 39, 31, 23, 15, 7 };
 
     // Inverse Initial Permutation Table
-    int[] IP1 = { 40, 8, 48, 16, 56, 24, 64,
+    static int[] IP1 = { 40, 8, 48, 16, 56, 24, 64,
             32, 39, 7, 47, 15, 55,
             23, 63, 31, 38, 6, 46,
             14, 54, 22, 62, 30, 37,
@@ -33,7 +33,7 @@ public class Des {
             17, 57, 25 };
 
     // first key-hePermutation Table
-    int[] PC1 = { 57, 49, 41, 33, 25,
+    static int[] PC1 = { 57, 49, 41, 33, 25,
             17, 9, 1, 58, 50, 42, 34, 26,
             18, 10, 2, 59, 51, 43, 35, 27,
             19, 11, 3, 60, 52, 44, 36, 63,
@@ -43,7 +43,7 @@ public class Des {
             20, 12, 4 };
 
     // second key-Permutation Table
-    int[] PC2 = { 14, 17, 11, 24, 1, 5, 3,
+    static int[] PC2 = { 14, 17, 11, 24, 1, 5, 3,
             28, 15, 6, 21, 10, 23, 19, 12,
             4, 26, 8, 16, 7, 27, 20, 13, 2,
             41, 52, 31, 37, 47, 55, 30, 40,
@@ -51,7 +51,7 @@ public class Des {
             34, 53, 46, 42, 50, 36, 29, 32 };
 
     // Expansion D-box Table
-    int[] EP = { 32, 1, 2, 3, 4, 5, 4,
+    static int[] EP = { 32, 1, 2, 3, 4, 5, 4,
             5, 6, 7, 8, 9, 8, 9, 10,
             11, 12, 13, 12, 13, 14, 15,
             16, 17, 16, 17, 18, 19, 20,
@@ -60,14 +60,14 @@ public class Des {
             29, 30, 31, 32, 1 };
 
     // Straight Permutation Table
-    int[] P = { 16, 7, 20, 21, 29, 12, 28,
+    static int[] P = { 16, 7, 20, 21, 29, 12, 28,
             17, 1, 15, 23, 26, 5, 18,
             31, 10, 2, 8, 24, 14, 32,
             27, 3, 9, 19, 13, 30, 6,
             22, 11, 4, 25 };
 
     // S-box Table
-    int[][][] sbox = {
+    static int[][][] sbox = {
             { { 14, 4, 13, 1, 2, 15, 11, 8, 3, 10, 6, 12, 5, 9, 0, 7 },
                     { 0, 15, 7, 4, 14, 2, 13, 1, 10, 6, 12, 11, 9, 5, 3, 8 },
                     { 4, 1, 14, 8, 13, 6, 2, 11, 15, 12, 9, 7, 3, 10, 5, 0 },
@@ -102,13 +102,13 @@ public class Des {
                     { 7, 11, 4, 1, 9, 12, 14, 2, 0, 6, 10, 13, 15, 3, 5, 8 },
                     { 2, 1, 14, 7, 4, 10, 8, 13, 15, 12, 9, 0, 3, 5, 6, 11 } }
     };
-    int[] shiftBits = { 1, 1, 2, 2, 2, 2, 2, 2,
+    static int[] shiftBits = { 1, 1, 2, 2, 2, 2, 2, 2,
             1, 2, 2, 2, 2, 2, 2, 1 };
 
     // hexadecimal to binary conversion
     String hextoBin(String input)
     {
-        Log.d(TAG, "hextoBin: input in hex: "+convertAsciiToHex(input));
+        //Log.d(TAG, "hextoBin: input in hex: "+input);
         int n = input.length() * 4;
         input = Long.toBinaryString(
                 Long.parseUnsignedLong(input, 16));
@@ -299,10 +299,16 @@ public class Des {
         Log.d(TAG, "Des: encrypt: PlainText: "+plainText);
         Des des=new Des();
         String encrypedText="";
-        String keyInHex=des.convertAsciiToHex(key);  // problematic
+        String keyInHex=des.convertAsciiToHex(key);
         List<String> splittedPlainText= TextSplitter.split(plainText,8);
+        for(int i=0;i<splittedPlainText.size();i++){
+            Log.d(TAG, "Des: encrypt: splittedPlainText["+i+"]: "+splittedPlainText.get(i)+" (in ASCII)");
+            Log.d(TAG, "Des: encrypt: splittedPlainText["+i+"]: "+des.convertAsciiToHex(splittedPlainText.get(i))+" (in Hex)");
+        }
         while(!splittedPlainText.isEmpty()){
             //Log.d(TAG, "Des: encrypt: splitted Plaintext: "+plainText);
+            Log.d(TAG, "Des: encrypt: encrypting: "+splittedPlainText.get(0)+" (in ASCII)");
+            Log.d(TAG, "Des: encrypt: encrypting: "+des.convertAsciiToHex(splittedPlainText.get(0))+" (in Hex)");
             encrypedText=encrypedText.concat(des.encryptOnce(des.convertAsciiToHex(splittedPlainText.get(0)),key));
             splittedPlainText.remove(0);
         }
