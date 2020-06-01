@@ -301,14 +301,13 @@ public class Des {
         String encrypedText="";
         String keyInHex=des.convertAsciiToHex(key);
         List<String> splittedPlainText= TextSplitter.split(plainText,8);
-        for(int i=0;i<splittedPlainText.size();i++){
+/*        for(int i=0;i<splittedPlainText.size();i++){
             Log.d(TAG, "Des: encrypt: splittedPlainText["+i+"]: "+splittedPlainText.get(i)+" (in ASCII)");
             Log.d(TAG, "Des: encrypt: splittedPlainText["+i+"]: "+des.convertAsciiToHex(splittedPlainText.get(i))+" (in Hex)");
-        }
+        }*/
         while(!splittedPlainText.isEmpty()){
-            //Log.d(TAG, "Des: encrypt: splitted Plaintext: "+plainText);
-            Log.d(TAG, "Des: encrypt: encrypting: "+splittedPlainText.get(0)+" (in ASCII)");
-            Log.d(TAG, "Des: encrypt: encrypting: "+des.convertAsciiToHex(splittedPlainText.get(0))+" (in Hex)");
+            //Log.d(TAG, "Des: encrypt: encrypting: "+splittedPlainText.get(0)+" (in ASCII)");
+            //Log.d(TAG, "Des: encrypt: encrypting: "+des.convertAsciiToHex(splittedPlainText.get(0))+" (in Hex)");
             encrypedText=encrypedText.concat(des.encryptOnce(des.convertAsciiToHex(splittedPlainText.get(0)),key));
             splittedPlainText.remove(0);
         }
@@ -359,6 +358,17 @@ public class Des {
         }
 
         return output.toString();
+    }
+
+    public static String splittedDecrypt(String plainText,String key){
+        String result="";
+        List<String> splittedPlainText_16= TextSplitter.split(plainText,16);
+        while(!splittedPlainText_16.isEmpty()){
+            Log.d(TAG, "Des: splittedDecrypt: decrypting: "+splittedPlainText_16.get(0)+" (in ASCII)");
+            result=result.concat(Des.decrypt(splittedPlainText_16.get(0),key));
+            splittedPlainText_16.remove(0);
+        }
+        return result;
     }
 
 }
