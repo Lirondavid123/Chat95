@@ -9,14 +9,15 @@ import androidx.room.PrimaryKey;
 public class ConversationEntity {
 
     @PrimaryKey@NonNull
-    private String uid;
+    private String conversationId;
 
     @ColumnInfo
-    private String e;
+    private String myE;
+    @ColumnInfo
+    private String myN;
 
     @ColumnInfo
     private String d;
-
     @ColumnInfo
     private String p;
 
@@ -24,39 +25,41 @@ public class ConversationEntity {
     private String q;
 
     @ColumnInfo
-    private String n;
-
-    @ColumnInfo
     private String SymmetricKey;
-
+    @ColumnInfo
+    private String foreignE;
+    @ColumnInfo
+    private String foreignN;
 
     public ConversationEntity(){}
 
-    public ConversationEntity(@NonNull String uid, String e, String d, String p, String q, String n, String symmetricKey) {
-        this.uid = uid;
-        this.e = e;
+    public ConversationEntity(@NonNull String conversationId, String myE, String myN, String d, String p, String q, String symmetricKey, String foreignE, String foreignN) {
+        this.conversationId = conversationId;
+        this.myE = myE;
+        this.myN = myN;
         this.d = d;
         this.p = p;
         this.q = q;
-        this.n = n;
         SymmetricKey = symmetricKey;
+        this.foreignE = foreignE;
+        this.foreignN = foreignN;
     }
 
     @NonNull
-    public String getUid() {
-        return uid;
+    public String getConversationId() {
+        return conversationId;
     }
 
-    public void setUid(@NonNull String uid) {
-        this.uid = uid;
+    public void setConversationId(@NonNull String conversationId) {
+        this.conversationId = conversationId;
     }
 
-    public String getE() {
-        return e;
+    public String getMyE() {
+        return myE;
     }
 
-    public void setE(String e) {
-        this.e = e;
+    public void setMyE(String myE) {
+        this.myE = myE;
     }
 
     public String getD() {
@@ -83,12 +86,12 @@ public class ConversationEntity {
         this.q = q;
     }
 
-    public String getN() {
-        return n;
+    public String getMyN() {
+        return myN;
     }
 
-    public void setN(String n) {
-        this.n = n;
+    public void setMyN(String myN) {
+        this.myN = myN;
     }
 
     public String getSymmetricKey() {
@@ -97,5 +100,21 @@ public class ConversationEntity {
 
     public void setSymmetricKey(String symmetricKey) {
         SymmetricKey = symmetricKey;
+    }
+
+    public String getForeignE() {
+        return foreignE;
+    }
+
+    public void setForeignE(String foreignE) {
+        this.foreignE = foreignE;
+    }
+
+    public String getForeignN() {
+        return foreignN;
+    }
+
+    public void setForeignN(String foreignN) {
+        this.foreignN = foreignN;
     }
 }

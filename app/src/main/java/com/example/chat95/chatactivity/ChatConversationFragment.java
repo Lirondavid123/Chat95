@@ -27,6 +27,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 
+import com.example.chat95.cryptology.KeyGenerator;
 import com.example.chat95.cryptology.Rsa;
 import com.example.chat95.data.PrivateKey;
 import com.example.chat95.data.PublicKey;
@@ -73,6 +74,7 @@ public class ChatConversationFragment extends Fragment {
     private String conversationId;
     private FirebaseFunctions mFunctions;
     private UsersViewModel mUsersViewModel;
+
 
 
     public ChatConversationFragment() {
@@ -263,6 +265,21 @@ public class ChatConversationFragment extends Fragment {
                 binding.chatUserInput.setVisibility(View.VISIBLE);
                 binding.chatConversationSendBtn.setVisibility(View.VISIBLE);
                 //
+                // TODO: 01/06/2020 crypto- replace temporary methods with real ones
+                PublicKey foreignPublicKey = chosenChatConversation.getPublicKey();
+                String symmetricKey = KeyGenerator.generateKey(8);
+                byte[] symmetricKeyBytes = symmetricKey.getBytes();
+                byte[] KICBytes = new Rsa().encrypt(symmetricKeyBytes);
+                String KIC = KICBytes.toString();
+
+                PrivateKey privateKey = Rsa.createPrivateKey();
+                PublicKey publicKey = Rsa.getPublicKey();
+                //save keys to local database
+                LocalDataBase.InsertConversationData(new ConversationEntity(conversationId, publicKey.getE()
+                        , publicKey.getN()
+                        , privateKey.getD(), privateKey.getP(), privateKey.getQ(), symmetricKey, foreignPublicKey.getE(), foreignPublicKey.getN()));
+
+                //
 
                 // TODO: 28/05/2020 edit the cloud function approveChatConversation for this project
 /*                approveChatConversation().addOnCompleteListener(new OnCompleteListener<String>() {
@@ -358,13 +375,12 @@ public class ChatConversationFragment extends Fragment {
         binding.chatConversationRecyclerview.scrollToPosition(firebaseRecyclerAdapter.getItemCount() - 1);
     }
 
-    //    private void createNewConversationInDB(final Map<String, Object> childUpdates, String textMessage) {
     private void createNewConversationInDB() {
         final Map<String, Object> childUpdates = new HashMap<>();
         dbRef = FirebaseDatabase.getInstance().getReference();
         conversationId = dbRef.child(ConstantValues.CHAT_MESSAGES).push().getKey();
-        PrivateKey privateKey=Rsa.createPrivateKey();
-        PublicKey publicKey= Rsa.getPublicKey();
+        PrivateKey privateKey = Rsa.createPrivateKey();
+        PublicKey publicKey = Rsa.getPublicKey();
 
         chosenChatConversation = new ChatConversation(publicKey, conversationId,
                 ChatActivity.getFireBaseAuth().getUid(),
@@ -391,6 +407,11 @@ public class ChatConversationFragment extends Fragment {
 //                        prepareDatabaseQuery();
             }
         });
+
+        //save keys to local database
+        LocalDataBase.InsertConversationData(new ConversationEntity(conversationId, publicKey.getE()
+                , publicKey.getN()
+                , privateKey.getD(), privateKey.getP(), privateKey.getQ(), null, null, null));
     }
 
     private void prepareDatabaseQuery() {

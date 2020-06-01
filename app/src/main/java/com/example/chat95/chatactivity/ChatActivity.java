@@ -83,6 +83,10 @@ public class ChatActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
         //Log.d(TAG, "onStart: toHextString Test:  "+Long.toHexString());
+
+        LocalDataBase.setMyDAO(AppDatabase.getAppDatabase(getApplicationContext()).ConversationDAO());
+
+
         Des des=new Des();
         String resultText;
 //        String myKey= KeyGenerator.generateKey(16);
