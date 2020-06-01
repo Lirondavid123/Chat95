@@ -12,16 +12,19 @@ public class ConversationEntity {
     private String uid;
 
     @ColumnInfo
-    private String myprivateKey;
+    private String e;
 
     @ColumnInfo
-    private String mypublicKey;
+    private String d;
 
     @ColumnInfo
-    private String partnerKey;
+    private String p;
 
     @ColumnInfo
-    private String partnerMod;
+    private String q;
+
+    @ColumnInfo
+    private String n;
 
     @ColumnInfo
     private String SymmetricKey;
@@ -29,13 +32,13 @@ public class ConversationEntity {
 
     public ConversationEntity(){}
 
-
-    public ConversationEntity(@NonNull String uid, String myprivateKey, String mypublicKey, String partnerKey, String partnerMod, String symmetricKey) {
+    public ConversationEntity(@NonNull String uid, String e, String d, String p, String q, String n, String symmetricKey) {
         this.uid = uid;
-        this.myprivateKey = myprivateKey;
-        this.mypublicKey = mypublicKey;
-        this.partnerKey = partnerKey;
-        this.partnerMod = partnerMod;
+        this.e = e;
+        this.d = d;
+        this.p = p;
+        this.q = q;
+        this.n = n;
         SymmetricKey = symmetricKey;
     }
 
@@ -44,45 +47,52 @@ public class ConversationEntity {
         return uid;
     }
 
-    public String getMyprivateKey() {
-        return myprivateKey;
+    public void setUid(@NonNull String uid) {
+        this.uid = uid;
     }
 
-    public String getMypublicKey() {
-        return mypublicKey;
+    public String getE() {
+        return e;
     }
 
-    public String getPartnerKey() {
-        return partnerKey;
+    public void setE(String e) {
+        this.e = e;
     }
 
-    public String getPartnerMod() {
-        return partnerMod;
+    public String getD() {
+        return d;
+    }
+
+    public void setD(String d) {
+        this.d = d;
+    }
+
+    public String getP() {
+        return p;
+    }
+
+    public void setP(String p) {
+        this.p = p;
+    }
+
+    public String getQ() {
+        return q;
+    }
+
+    public void setQ(String q) {
+        this.q = q;
+    }
+
+    public String getN() {
+        return n;
+    }
+
+    public void setN(String n) {
+        this.n = n;
     }
 
     public String getSymmetricKey() {
         return SymmetricKey;
-    }
-
-
-    public void setUid(String uid) {
-        this.uid = uid;
-    }
-
-    public void setMyprivateKey(String myprivateKey) {
-        this.myprivateKey = myprivateKey;
-    }
-
-    public void setMypublicKey(String mypublicKey) {
-        this.mypublicKey = mypublicKey;
-    }
-
-    public void setPartnerKey(String partnerKey) {
-        this.partnerKey = partnerKey;
-    }
-
-    public void setPartnerMod(String partnerMod) {
-        this.partnerMod = partnerMod;
     }
 
     public void setSymmetricKey(String symmetricKey) {
