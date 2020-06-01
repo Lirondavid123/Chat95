@@ -1,6 +1,7 @@
 package com.example.chat95.data;
 
 public class ChatConversation {
+    private PublicKey publicKey;
     private String conversationId;
     private String userName;
     private String chosenUid;
@@ -12,7 +13,8 @@ public class ChatConversation {
 
     }
 
-    public ChatConversation(String conversationId, String sender, String receiver, String sentToProfilePicture, boolean isApproved,String userName, String chosenUid) {
+    public ChatConversation(PublicKey publicKey, String conversationId, String sender, String receiver, String sentToProfilePicture, boolean isApproved, String userName, String chosenUid) {
+        this.publicKey = publicKey;
         this.conversationId = conversationId;
         this.sender = sender;
         this.receiver = receiver;
@@ -76,6 +78,14 @@ public class ChatConversation {
 
     public void setChosenUid(String chosenUid) {
         this.chosenUid = chosenUid;
+    }
+
+    public PublicKey getPublicKey() {
+        return publicKey;
+    }
+
+    public void setPublicKey(PublicKey publicKey) {
+        this.publicKey = publicKey;
     }
     //
 }

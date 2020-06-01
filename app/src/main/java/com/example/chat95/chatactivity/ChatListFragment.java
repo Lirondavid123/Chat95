@@ -142,15 +142,15 @@ public class ChatListFragment extends Fragment {
     private void prepareDatabaseQuery() {
         final Query conversationsRef = FirebaseDatabase.getInstance().getReference()
                 .child(ConstantValues.CHAT_CONVERSATIONS).child(ChatActivity.getFireBaseAuth().getUid());
-
+// TODO: 01/06/2020 edit the real time factor 
         conversationsRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 if (!dataSnapshot.hasChildren()) {
                     Toast.makeText(getContext(), "No chats to display yet...send some greetings to others!", Toast.LENGTH_LONG).show();
-                    if (firebaseRecyclerAdapter != null) {
+/*                    if (firebaseRecyclerAdapter != null) {
                         firebaseRecyclerAdapter.stopListening();
-                    }
+                    }*/
                 } else {
                     if (binding != null || binding.chatListRecycler != null) {
                         displayConversationsList(binding.chatListRecycler, conversationsRef);

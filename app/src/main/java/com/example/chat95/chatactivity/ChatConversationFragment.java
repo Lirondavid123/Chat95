@@ -27,6 +27,9 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 
+import com.example.chat95.cryptology.Rsa;
+import com.example.chat95.data.PrivateKey;
+import com.example.chat95.data.PublicKey;
 import com.example.chat95.utils.ConstantValues;
 import com.example.chat95.R;
 import com.example.chat95.data.ChatConversation;
@@ -36,7 +39,6 @@ import com.example.chat95.utils.DateUtils;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
 import com.google.android.gms.tasks.Continuation;
-import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DataSnapshot;
@@ -57,6 +59,7 @@ import java.util.Map;
  */
 public class ChatConversationFragment extends Fragment {
     private static final String TAG = "ChatConversationFragment";
+
     private FragmentChatConversationBinding binding;
     private NavController navController;
     private String chosenUid;
@@ -360,30 +363,22 @@ public class ChatConversationFragment extends Fragment {
         final Map<String, Object> childUpdates = new HashMap<>();
         dbRef = FirebaseDatabase.getInstance().getReference();
         conversationId = dbRef.child(ConstantValues.CHAT_MESSAGES).push().getKey();
+        PrivateKey privateKey=Rsa.createPrivateKey();
+        PublicKey publicKey= Rsa.getPublicKey();
 
-
-/*        String newMessageId = dbRef.child(ConstantValues.CHAT_MESSAGES).child(conversationId).push().getKey();
-
-        ChatMessage chatMessage = new ChatMessage(textMessage,
-                ChatActivity.getLoggedUser().getUserId(),
-                chosenUid,
-                DateUtils.getCurrentTimeString());*/
-
-
-        chosenChatConversation = new ChatConversation(conversationId,
+        chosenChatConversation = new ChatConversation(publicKey, conversationId,
                 ChatActivity.getFireBaseAuth().getUid(),
                 chosenUid,
                 ChatActivity.getLoggedUser().getProfileImage(), false, ChatActivity.getLoggedUser().getUserFullName(), ChatActivity.getFireBaseAuth().getUid());
 
-
-//        childUpdates.put(String.format("/%s/%s/%s", ConstantValues.CHAT_MESSAGES, conversationId, newMessageId), chatMessage);
         childUpdates.put(String.format("/%s/%s/%s", ConstantValues.CHAT_CONVERSATIONS, chosenUid, ChatActivity.getCurrentUser().getUid()), chosenChatConversation);
 
-        ChatConversation chatConversation = new ChatConversation(conversationId,
+        ChatConversation chatConversation = new ChatConversation(publicKey, conversationId,
                 ChatActivity.getLoggedUser().getUserId(),
                 chosenUid,
                 photoUrl, false, userName, chosenUid);
         chatViewModel.setChosenChatConversation(chatConversation);
+
         childUpdates.put(String.format("/%s/%s/%s",
                 ConstantValues.CHAT_CONVERSATIONS
                 , ChatActivity.getCurrentUser().getUid()
@@ -396,39 +391,6 @@ public class ChatConversationFragment extends Fragment {
 //                        prepareDatabaseQuery();
             }
         });
-/*        DatabaseReference userPhotoRef = dbRef
-                .child(ConstantValues.USERS)
-                .child(chosenUid);*/
-      /*  userPhotoRef.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                String photoUrl = (String) dataSnapshot.child(ConstantValues.PROFILE_PHOTO).getValue();
-                String userName = String.format("%s %s", dataSnapshot.child(ConstantValues.USER_FIRST_NAME).getValue(), dataSnapshot.child(ConstantValues.USER_LAST_NAME).getValue());
-
-                ChatConversation chatConversation = new ChatConversation(conversationId,
-                        ChatActivity.getLoggedUser().getUserId(),
-                        chosenUid,
-                        photoUrl, false, userName, chosenUid);
-                childUpdates.put(String.format("/%s/%s/%s",
-                        ConstantValues.CHAT_CONVERSATIONS
-                        , ChatActivity.getCurrentUser().getUid()
-                        , chosenUid)
-                        , chatConversation);
-                dbRef.updateChildren(childUpdates).addOnSuccessListener(new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void aVoid) {
-                        doesConversationExist = true;
-//                        prepareDatabaseQuery();
-                    }
-                });
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        });
-*/
     }
 
     private void prepareDatabaseQuery() {
