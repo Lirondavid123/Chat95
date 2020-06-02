@@ -26,20 +26,22 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
-
+import com.example.chat95.R;
+import com.example.chat95.cryptology.Des;
 import com.example.chat95.cryptology.KeyGenerator;
 import com.example.chat95.cryptology.Rsa;
-import com.example.chat95.data.PrivateKey;
-import com.example.chat95.data.PublicKey;
-import com.example.chat95.utils.ConstantValues;
-import com.example.chat95.R;
 import com.example.chat95.data.ChatConversation;
 import com.example.chat95.data.ChatMessage;
+import com.example.chat95.data.Keys;
+import com.example.chat95.data.PrivateKey;
+import com.example.chat95.data.PublicKey;
 import com.example.chat95.databinding.FragmentChatConversationBinding;
+import com.example.chat95.utils.ConstantValues;
 import com.example.chat95.utils.DateUtils;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
 import com.google.android.gms.tasks.Continuation;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DataSnapshot;
@@ -74,7 +76,10 @@ public class ChatConversationFragment extends Fragment {
     private String conversationId;
     private FirebaseFunctions mFunctions;
     private UsersViewModel mUsersViewModel;
-
+    private ValueEventListener approvedListener;
+    private String symmetricKey;
+    private PrivateKey privateKey;
+    private PublicKey foreignPublicKey;
 
 
     public ChatConversationFragment() {
@@ -132,6 +137,36 @@ public class ChatConversationFragment extends Fragment {
             doesConversationExist = true;
             getConversationDetails(chatViewModel.getChosenChatConversation().getValue());
         }
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        approvedListener = dbRef.child(ConstantValues.CHAT_CONVERSATIONS)
+                .child(chosenUid)
+                .child(ChatActivity.getFireBaseAuth().getUid())
+                .addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+//                        if (dataSnapshot.hasChild(ConstantValues.APPROVED))
+                        if ((Boolean) dataSnapshot.child(ConstantValues.APPROVED).getValue() == true) {
+                            String KIC = (String) dataSnapshot.child("KIC").getValue();
+                            PublicKey foreignPublicKey = (PublicKey) dataSnapshot.child("publicKey").getValue();
+                            String symetricKey;
+                            ConversationEntity conversationEntity = LocalDataBase.retrieveConversationData(conversationId);
+                            PrivateKey privateKey = new PrivateKey(conversationEntity.getP(), conversationEntity.getQ(), conversationEntity.getD());
+                            symetricKey = Rsa.decrypt(KIC, privateKey);
+                            //save the final conversation data to local database
+                            LocalDataBase.updateFinalConversationData(conversationId, foreignPublicKey, symetricKey);
+                            // TODO: 02/06/2020  set the user's input to be available to send new messages
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                    }
+                });
     }
 
     private void getConversationDetails(ChatConversation chatConversation) {
@@ -260,24 +295,57 @@ public class ChatConversationFragment extends Fragment {
             public void onClick(View v) {
                 binding.declineBtn.setEnabled(false);
                 binding.approveBtn.setEnabled(false);
-                // TODO: 29/05/2020 delete after adding the cloud function
+/*                // TODO: 29/05/2020 delete after adding the cloud function
                 binding.approveMessageLayout.setVisibility(View.GONE);
                 binding.chatUserInput.setVisibility(View.VISIBLE);
-                binding.chatConversationSendBtn.setVisibility(View.VISIBLE);
+                binding.chatConversationSendBtn.setVisibility(View.VISIBLE);*/
                 //
                 // TODO: 01/06/2020 crypto- replace temporary methods with real ones
                 PublicKey foreignPublicKey = chosenChatConversation.getPublicKey();
-                String symmetricKey = KeyGenerator.generateKey(8);
-                byte[] symmetricKeyBytes = symmetricKey.getBytes();
-                byte[] KICBytes = new Rsa().encrypt(symmetricKeyBytes);
-                String KIC = KICBytes.toString();
+                String symmetricKey = KeyGenerator.generateKey(24);
+                String KIC = Rsa.encrypt(symmetricKey, foreignPublicKey);
 
-                PrivateKey privateKey = Rsa.createPrivateKey();
-                PublicKey publicKey = Rsa.getPublicKey();
+                Keys keys = Rsa.createKeys();
+                PrivateKey privateKey = keys.getPrivateKey();
+                PublicKey publicKey = keys.getPublicKey();
                 //save keys to local database
                 LocalDataBase.InsertConversationData(new ConversationEntity(conversationId, publicKey.getE()
                         , publicKey.getN()
                         , privateKey.getD(), privateKey.getP(), privateKey.getQ(), symmetricKey, foreignPublicKey.getE(), foreignPublicKey.getN()));
+
+                HashMap childUpdates = new HashMap();
+                childUpdates.put(String.format("/%s/%s/%s/%s",
+                        ConstantValues.CHAT_CONVERSATIONS
+                        , ChatActivity.getFireBaseAuth().getUid()
+                        , chosenUid, "publicKey")
+                        , publicKey);
+                childUpdates.put(String.format("/%s/%s/%s/%s",
+                        ConstantValues.CHAT_CONVERSATIONS
+                        , ChatActivity.getFireBaseAuth().getUid()
+                        , chosenUid, "KIC")
+                        , KIC);
+                childUpdates.put(String.format("/%s/%s/%s/%s",
+                        ConstantValues.CHAT_CONVERSATIONS
+                        , ChatActivity.getFireBaseAuth().getUid()
+                        , chosenUid, ConstantValues.APPROVED)
+                        , true);
+                childUpdates.put(String.format("/%s/%s/%s/%s",
+                        ConstantValues.CHAT_CONVERSATIONS
+                        , chosenUid
+                        , ChatActivity.getFireBaseAuth().getUid(), ConstantValues.APPROVED)
+                        , true);
+                dbRef = FirebaseDatabase.getInstance().getReference();
+                dbRef.updateChildren(childUpdates).addOnCompleteListener(new OnCompleteListener() {
+                    @Override
+                    public void onComplete(@NonNull Task task) {
+                        Toast.makeText(getContext(), "Conversation has been approved! say hi to your new pal", Toast.LENGTH_SHORT).show();
+                        if (binding != null) {
+                            binding.approveMessageLayout.setVisibility(View.GONE);
+                            binding.chatUserInput.setVisibility(View.VISIBLE);
+                            binding.chatConversationSendBtn.setVisibility(View.VISIBLE);
+                        }
+                    }
+                });
 
                 //
 
@@ -365,10 +433,21 @@ public class ChatConversationFragment extends Fragment {
     }
 
     private void addMessage(String textMessage, String conversationId) {
-        ChatMessage chatMessage = new ChatMessage(textMessage,
+
+        // TODO: 02/06/2020 crypto, check if correct
+        String cipherText = Des.encrypt(textMessage, symmetricKey);
+        String signature = Rsa.signature(textMessage, privateKey);
+
+
+        ChatMessage chatMessage = new ChatMessage(cipherText,
                 ChatActivity.getFireBaseAuth().getUid(),
                 chosenUid,
-                DateUtils.getCurrentTimeString());
+                DateUtils.getCurrentTimeString(), signature);
+        //
+/*        ChatMessage chatMessage = new ChatMessage(textMessage,
+                ChatActivity.getFireBaseAuth().getUid(),
+                chosenUid,
+                DateUtils.getCurrentTimeString());*/
         DatabaseReference messageRef = dbRef.child(ConstantValues.CHAT_MESSAGES).child(conversationId).push();
 
         messageRef.setValue(chatMessage);
@@ -379,9 +458,12 @@ public class ChatConversationFragment extends Fragment {
         final Map<String, Object> childUpdates = new HashMap<>();
         dbRef = FirebaseDatabase.getInstance().getReference();
         conversationId = dbRef.child(ConstantValues.CHAT_MESSAGES).push().getKey();
-        PrivateKey privateKey = Rsa.createPrivateKey();
-        PublicKey publicKey = Rsa.getPublicKey();
 
+        // TODO: 02/06/2020 crypto, check if correct
+        Keys keys = Rsa.createKeys();
+        PrivateKey privateKey = keys.getPrivateKey();
+        PublicKey publicKey = keys.getPublicKey();
+        //
         chosenChatConversation = new ChatConversation(publicKey, conversationId,
                 ChatActivity.getFireBaseAuth().getUid(),
                 chosenUid,
@@ -407,11 +489,12 @@ public class ChatConversationFragment extends Fragment {
 //                        prepareDatabaseQuery();
             }
         });
-
+        // TODO: 02/06/2020 crypto, check if correct
         //save keys to local database
         LocalDataBase.InsertConversationData(new ConversationEntity(conversationId, publicKey.getE()
                 , publicKey.getN()
                 , privateKey.getD(), privateKey.getP(), privateKey.getQ(), null, null, null));
+        //
     }
 
     private void prepareDatabaseQuery() {
@@ -455,18 +538,24 @@ public class ChatConversationFragment extends Fragment {
 
             @Override
             protected void onBindViewHolder(@NonNull ChatMessageViewHolder holder, int position, @NonNull final ChatMessage model) {
-
-                holder.messageDate.setText(model.getTimeStamp());
-                holder.textMessage.setText(model.getTextMessage());
-                Drawable background;
-                if (model.getSenderId().equals(ChatActivity.getFireBaseAuth().getUid())) {
-                    background = getResources().getDrawable(R.drawable.message_form_blue);
-                    holder.textMessage.setLayoutDirection(View.LAYOUT_DIRECTION_RTL);
+                String textMessage = Des.decrypt(model.getTextMessage(), symmetricKey);
+                boolean isVerified = Rsa.verify(textMessage, model.getSignature(), foreignPublicKey);
+                if (isVerified) {
+                    holder.messageDate.setText(model.getTimeStamp());
+                    holder.textMessage.setText(textMessage);
+                    Drawable background;
+                    if (model.getSenderId().equals(ChatActivity.getFireBaseAuth().getUid())) {
+                        background = getResources().getDrawable(R.drawable.message_form_blue);
+                        holder.textMessage.setLayoutDirection(View.LAYOUT_DIRECTION_RTL);
+                    } else {
+                        background = getResources().getDrawable(R.drawable.message_form_grey);
+                        holder.textMessage.setLayoutDirection(View.LAYOUT_DIRECTION_LTR);
+                    }
+                    holder.textMessage.setBackground(background);
                 } else {
-                    background = getResources().getDrawable(R.drawable.message_form_grey);
-                    holder.textMessage.setLayoutDirection(View.LAYOUT_DIRECTION_LTR);
+                    weAreAngry();
                 }
-                holder.textMessage.setBackground(background);
+
             }
 
         };
@@ -474,6 +563,10 @@ public class ChatConversationFragment extends Fragment {
 
         firebaseRecyclerAdapter.startListening();
         chatMessagesRecyclerView.scrollToPosition(firebaseRecyclerAdapter.getItemCount() - 1);
+    }
+
+    private void weAreAngry() {
+        Toast.makeText(getContext(), "Conversation was hacked!!!", Toast.LENGTH_SHORT).show();
     }
 
     @Override

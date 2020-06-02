@@ -25,8 +25,6 @@ public interface ConversationDAO {
 
     @Insert
     void insert(ConversationEntity user);
-    @Update
-    public void update(ConversationEntity conversationEntity);
 
     @Delete
     void delete(ConversationEntity user);

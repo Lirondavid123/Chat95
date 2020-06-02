@@ -8,7 +8,8 @@ import androidx.room.PrimaryKey;
 @Entity
 public class ConversationEntity {
 
-    @PrimaryKey@NonNull
+    @PrimaryKey
+    @NonNull
     private String conversationId;
 
     @ColumnInfo
@@ -23,7 +24,6 @@ public class ConversationEntity {
 
     @ColumnInfo
     private String q;
-
     @ColumnInfo
     private String SymmetricKey;
     @ColumnInfo
@@ -31,7 +31,8 @@ public class ConversationEntity {
     @ColumnInfo
     private String foreignN;
 
-    public ConversationEntity(){}
+    public ConversationEntity() {
+    }
 
     public ConversationEntity(@NonNull String conversationId, String myE, String myN, String d, String p, String q, String symmetricKey, String foreignE, String foreignN) {
         this.conversationId = conversationId;

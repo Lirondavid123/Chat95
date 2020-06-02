@@ -1,5 +1,6 @@
 package com.example.chat95.cryptology;
 
+import com.example.chat95.data.Keys;
 import com.example.chat95.data.PrivateKey;
 import com.example.chat95.data.PublicKey;
 
@@ -10,9 +11,9 @@ public class Rsa {
 
     private BigInteger p;
     private BigInteger q;
-    private BigInteger N;
+    private static BigInteger N;
     private BigInteger phi;
-    private BigInteger e;
+    private static BigInteger e;
     private BigInteger d;
     private int bitlength = 1024;
     private Random r;
@@ -56,7 +57,24 @@ public class Rsa {
         return privateKey;
     }
 
+    public static Keys createKeys() {
+        return new Keys();
+    }
+
     // Encrypt message
+    public static String encrypt(String text, PublicKey foreignPublicKey) {
+        // TODO: 02/06/2020
+
+        return text + "$$";
+    }
+
+    // Decrypt message
+    public static String decrypt(String text, PrivateKey privateKey) {
+        // TODO: 02/06/2020
+
+        return text.substring(0, text.length() - 2);
+    }
+    /*// Encrypt message
     public byte[] encrypt(byte[] message) {
         return (new BigInteger(message)).modPow(e, N).toByteArray();
     }
@@ -64,16 +82,18 @@ public class Rsa {
     // Decrypt message
     public byte[] decrypt(byte[] message) {
         return (new BigInteger(message)).modPow(d, N).toByteArray();
+    }*/
+
+
+    public static String signature(String textMessage, PrivateKey privateKey) {
+        // TODO: 02/06/2020
+
+        return KeyGenerator.generateKey(6);
     }
 
-    public static PublicKey getPublicKey() {
-        String n;
-        String e;
-        // TODO: 01/06/2020 delete those values after RSA
-        n = "7409359639836890586905908";
-        e = "6043584064080965934894";
-        //
-        PublicKey publicKey = new PublicKey(e, n);
-        return publicKey;
+    public static boolean verify(String textMessage, String signature, PublicKey foreignPublicKey) {
+        // TODO: 02/06/2020
+
+        return true;
     }
 }
