@@ -30,11 +30,13 @@ public class ConversationEntity {
     private String foreignE;
     @ColumnInfo
     private String foreignN;
+    @ColumnInfo
+    private boolean isApproved;
 
     public ConversationEntity() {
     }
 
-    public ConversationEntity(@NonNull String conversationId, String myE, String myN, String d, String p, String q, String symmetricKey, String foreignE, String foreignN) {
+    public ConversationEntity(@NonNull String conversationId, String myE, String myN, String d, String p, String q, String symmetricKey, String foreignE, String foreignN, boolean isApproved) {
         this.conversationId = conversationId;
         this.myE = myE;
         this.myN = myN;
@@ -44,6 +46,7 @@ public class ConversationEntity {
         SymmetricKey = symmetricKey;
         this.foreignE = foreignE;
         this.foreignN = foreignN;
+        this.isApproved = isApproved;
     }
 
     @NonNull
@@ -117,5 +120,13 @@ public class ConversationEntity {
 
     public void setForeignN(String foreignN) {
         this.foreignN = foreignN;
+    }
+
+    public boolean isApproved() {
+        return isApproved;
+    }
+
+    public void setApproved(boolean approved) {
+        isApproved = approved;
     }
 }

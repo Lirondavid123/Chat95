@@ -2,8 +2,6 @@ package com.example.chat95.chatactivity;
 
 import com.example.chat95.data.PublicKey;
 
-import java.util.List;
-
 public class LocalDataBase {
     public static AppDatabase instance;
     private static ConversationDAO myDAO;
@@ -17,7 +15,7 @@ public class LocalDataBase {
     }
 
     // TODO: 01/06/2020  
-    public static void updateFinalConversationData(String conversationId,PublicKey foreignKey,String symmetricKey) {
+    public static void updateFinalConversationData(String conversationId, PublicKey foreignKey, String symmetricKey, boolean isApproved) {
         ConversationEntity oldConversationData=myDAO.loadConversationData(conversationId);
         myDAO.delete(oldConversationData);
         myDAO.insert(new ConversationEntity(conversationId
@@ -28,7 +26,7 @@ public class LocalDataBase {
                 ,oldConversationData.getQ()
                 ,symmetricKey
                 ,foreignKey.getE()
-                ,foreignKey.getN()));
+                ,foreignKey.getN(), isApproved));
     }
 
     public static AppDatabase getInstance() {
