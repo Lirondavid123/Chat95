@@ -491,7 +491,9 @@ public class ChatConversationFragment extends Fragment {
 
         messageRef.setValue(chatMessage);
         // TODO: 03/06/2020 fix  firebaseRecyclerAdapter.getItemCount()(on null pointer exception)
-        binding.chatConversationRecyclerview.scrollToPosition(firebaseRecyclerAdapter.getItemCount() - 1);
+        if (firebaseRecyclerAdapter != null) {
+            binding.chatConversationRecyclerview.scrollToPosition(firebaseRecyclerAdapter.getItemCount() - 1);
+        }
     }
 
     private void createNewConversationInDB() {
