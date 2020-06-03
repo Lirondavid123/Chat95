@@ -149,6 +149,7 @@ public class ChatConversationFragment extends Fragment {
      * called when there is a certain existing conversation,that has been approved or not yet, by two users
      * isConversationPartiallyApproved- indicates if the conversation was approved by one user
      * isConversationTotallyApproved- indicates if the conversation was approved by both of the users, with emphasize on local storage
+     *
      * @param chatConversation
      */
     private void getConversationDetails(ChatConversation chatConversation) {
@@ -205,21 +206,10 @@ public class ChatConversationFragment extends Fragment {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                         if ((Boolean) dataSnapshot.child(ConstantValues.APPROVED).getValue() == true) {
-                            updateLocalDB( dataSnapshot.getValue(ChatConversation.class));
-                            dbRef.removeEventListener(this);
-                            /*String KIC = (String) dataSnapshot.child("KIC").getValue();
-                            PublicKey foreignPublicKey = (PublicKey) dataSnapshot.child("publicKey").getValue();
-                            String symmetricKey;
-                            ConversationEntity conversationEntity = LocalDataBase.retrieveConversationData(conversationId);
-                            PrivateKey privateKey = new PrivateKey(conversationEntity.getP(), conversationEntity.getQ(), conversationEntity.getD());
-                            symmetricKey = Rsa.decrypt(KIC, privateKey);
-                            //save the final conversation data to local database
-                            LocalDataBase.updateFinalConversationData(conversationId, foreignPublicKey, symmetricKey, true);
-                            ChatConversationFragment.symmetricKey = symmetricKey;
-                            ChatConversationFragment.foreignPublicKey = foreignPublicKey;
-                            ChatConversationFragment.privateKey = privateKey;
+                            updateLocalDB(dataSnapshot.getValue(ChatConversation.class));
 
-                            // TODO: 02/06/2020  delete keys from firebase database
+
+                            //delete keys from firebase database
                             HashMap childUpdates = new HashMap();
                             childUpdates.put(String.format("/%s/%s/%s/%s",
                                     ConstantValues.CHAT_CONVERSATIONS
@@ -231,11 +221,12 @@ public class ChatConversationFragment extends Fragment {
                                     , ChatActivity.getFireBaseAuth().getUid()
                                     , chosenUid, "KIC")
                                     , null);
-                            dbRef.updateChildren(childUpdates);*/
+                            dbRef.updateChildren(childUpdates);
                             if (binding != null) {
                                 prepareUserInputField();
                                 prepareDatabaseQuery();
                             }
+
                         }
                     }
 
@@ -256,21 +247,6 @@ public class ChatConversationFragment extends Fragment {
         //save the final conversation data to local database
         LocalDataBase.updateFinalConversationData(conversationId, foreignPublicKey, symmetricKey, true);
         updateCryptoConversationValues(symmetricKey, foreignPublicKey, privateKey);
-
-
-        // delete keys from firebase database
-        HashMap childUpdates = new HashMap();
-        childUpdates.put(String.format("/%s/%s/%s/%s",
-                ConstantValues.CHAT_CONVERSATIONS
-                , ChatActivity.getFireBaseAuth().getUid()
-                , chosenUid, "publicKey")
-                , null);
-        childUpdates.put(String.format("/%s/%s/%s/%s",
-                ConstantValues.CHAT_CONVERSATIONS
-                , ChatActivity.getFireBaseAuth().getUid()
-                , chosenUid, "KIC")
-                , null);
-        dbRef.updateChildren(childUpdates);
     }
 
     private void updateCryptoConversationValues(String symmetricKey, PublicKey foreignPublicKey, PrivateKey privateKey) {
@@ -374,24 +350,7 @@ public class ChatConversationFragment extends Fragment {
                 binding.declineBtn.setVisibility(View.GONE);
                 binding.infoAboutConversationApproval.setText("Waiting for the other side's approval");
                 binding.approveMessageLayout.setVisibility(View.VISIBLE);
-// TODO: 31/05/2020 uncomment this
                 createNewConversationInDB();
-/*                startNewChatConversation().addOnCompleteListener(new OnCompleteListener<String>() {
-                    @Override
-                    public void onComplete(@NonNull Task<String> task) {
-                        if (task.isSuccessful()) {
-                            binding.startConversationBtn.setVisibility(View.GONE);
-                            binding.chatUserInput.setVisibility(View.GONE);
-                            binding.approveMessageLayout.setVisibility(View.VISIBLE);
-                            binding.infoAboutConversationApproval.setText("Waiting for the other side's approval");
-                            Toast.makeText(getActivity(), "Conversation invitation sent! Waiting for the other side's approval...", Toast.LENGTH_LONG).show();
-                        } else {
-                            String errorMessage = task.getException().getMessage();
-                            Log.d(TAG, "onComplete: task not succeful starting conversation " + errorMessage);
-                            Toast.makeText(getActivity(), "sorry something went bad...try again later", Toast.LENGTH_LONG).show();
-                        }
-                    }
-                });*/
             }
         });
 
@@ -400,11 +359,7 @@ public class ChatConversationFragment extends Fragment {
             public void onClick(View v) {
                 binding.declineBtn.setEnabled(false);
                 binding.approveBtn.setEnabled(false);
-/*                // TODO: 29/05/2020 delete after adding the cloud function
-                binding.approveMessageLayout.setVisibility(View.GONE);
-                binding.chatUserInput.setVisibility(View.VISIBLE);
-                binding.chatConversationSendBtn.setVisibility(View.VISIBLE);*/
-                //
+
                 // TODO: 01/06/2020 crypto- replace temporary methods with real ones
                 PublicKey foreignPublicKey = chosenChatConversation.getPublicKey();
                 String symmetricKey = KeyGenerator.generateKey(24);
@@ -451,27 +406,6 @@ public class ChatConversationFragment extends Fragment {
                         }
                     }
                 });
-
-                //
-
-                // TODO: 28/05/2020 edit the cloud function approveChatConversation for this project
-/*                approveChatConversation().addOnCompleteListener(new OnCompleteListener<String>() {
-                    @Override
-                    public void onComplete(@NonNull Task<String> task) {
-                        if (task.isSuccessful()) {
-                            binding.approveMessageLayout.setVisibility(View.GONE);
-                            binding.chatUserInput.setVisibility(View.VISIBLE);
-                            binding.chatConversationSendBtn.setVisibility(View.VISIBLE);
-                            Toast.makeText(getActivity(), "Conversation Approved! There's nothing like a fresh new conversation...", Toast.LENGTH_LONG).show();
-                        } else {
-                            String errorMessage = task.getException().getMessage();
-                            Log.d(TAG, "onComplete: task not succeful approving conversation " + errorMessage);
-                            Toast.makeText(getActivity(), "sorry something went bad...try again later", Toast.LENGTH_LONG).show();
-                            binding.approveBtn.setEnabled(true);
-                            binding.declineBtn.setEnabled(true);
-                        }
-                    }
-                });*/
             }
         });
     }
@@ -556,6 +490,7 @@ public class ChatConversationFragment extends Fragment {
         DatabaseReference messageRef = dbRef.child(ConstantValues.CHAT_MESSAGES).child(conversationId).push();
 
         messageRef.setValue(chatMessage);
+        // TODO: 03/06/2020 fix  firebaseRecyclerAdapter.getItemCount()(on null pointer exception)
         binding.chatConversationRecyclerview.scrollToPosition(firebaseRecyclerAdapter.getItemCount() - 1);
     }
 
