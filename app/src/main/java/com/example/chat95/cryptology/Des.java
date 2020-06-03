@@ -301,7 +301,7 @@ public class Des {
         return textMessage + "$$";
     }
 
-    public static String decrypt(String cipherText,String key){
+/*    public static String decrypt(String cipherText,String key){
         String plainText="",cipherTextInHex;
         Des des=new Des();
         Log.d(TAG, "Des: decrypt: CipherText: "+cipherText);
@@ -318,7 +318,7 @@ public class Des {
         plainText=des.convertHexToAscii(plainText);
         Log.d(TAG, "Des: decrypt: PlainText: "+plainText);
         return plainText;
-    }
+    }*/
 
     public String convertAsciiToHex(String s){
 

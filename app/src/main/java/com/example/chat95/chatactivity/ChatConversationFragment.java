@@ -205,7 +205,7 @@ public class ChatConversationFragment extends Fragment {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                         if ((Boolean) dataSnapshot.child(ConstantValues.APPROVED).getValue() == true) {
-                            updateLocalDB((ChatConversation) dataSnapshot.getValue());
+                            updateLocalDB( dataSnapshot.getValue(ChatConversation.class));
                             dbRef.removeEventListener(this);
                             /*String KIC = (String) dataSnapshot.child("KIC").getValue();
                             PublicKey foreignPublicKey = (PublicKey) dataSnapshot.child("publicKey").getValue();

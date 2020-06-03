@@ -155,7 +155,7 @@ public class ChatListFragment extends Fragment {
                     }*/
                 } else {
                     conversationsRef.removeEventListener(this);
-                    if (binding != null || binding.chatListRecycler != null) {
+                    if (binding != null && binding.chatListRecycler != null) {
                         displayConversationsList(binding.chatListRecycler, conversationsRef);
                     }
                 }
