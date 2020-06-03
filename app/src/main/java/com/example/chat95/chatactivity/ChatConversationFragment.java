@@ -145,6 +145,12 @@ public class ChatConversationFragment extends Fragment {
         super.onStart();
     }
 
+    /**
+     * called when there is a certain existing conversation,that has been approved or not yet, by two users
+     * isConversationPartiallyApproved- indicates if the conversation was approved by one user
+     * isConversationTotallyApproved- indicates if the conversation was approved by both of the users, with emphasize on local storage
+     * @param chatConversation
+     */
     private void getConversationDetails(ChatConversation chatConversation) {
         Boolean isConversationPartiallyApproved, isConversationTotallyApproved;
         chosenChatConversation = chatConversation;
@@ -164,7 +170,9 @@ public class ChatConversationFragment extends Fragment {
             prepareDatabaseQuery();
         } else {
             setConversationApproval(isConversationPartiallyApproved, chosenChatConversation.getSender());
-            setAprrovalListener();
+            //if this user is the sender, wait for the other user's approval
+            if (chosenChatConversation.getSender().equals(ChatActivity.getFireBaseAuth().getUid()))
+                setAprrovalListener();
         }
 
 
