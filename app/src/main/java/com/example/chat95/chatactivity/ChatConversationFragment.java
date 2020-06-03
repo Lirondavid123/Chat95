@@ -388,6 +388,16 @@ public class ChatConversationFragment extends Fragment {
                         , KIC);
                 childUpdates.put(String.format("/%s/%s/%s/%s",
                         ConstantValues.CHAT_CONVERSATIONS
+                        , chosenUid
+                        , ChatActivity.getFireBaseAuth().getUid(), "kic")
+                        , KIC);
+                childUpdates.put(String.format("/%s/%s/%s/%s",
+                        ConstantValues.CHAT_CONVERSATIONS
+                        , chosenUid
+                        , ChatActivity.getFireBaseAuth().getUid(), "publicKey")
+                        , publicKey);
+                childUpdates.put(String.format("/%s/%s/%s/%s",
+                        ConstantValues.CHAT_CONVERSATIONS
                         , ChatActivity.getFireBaseAuth().getUid()
                         , chosenUid, ConstantValues.APPROVED)
                         , true);
