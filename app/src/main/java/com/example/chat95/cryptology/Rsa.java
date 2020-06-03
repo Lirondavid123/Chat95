@@ -58,7 +58,7 @@ public class Rsa {
     }
 
     public static Keys createKeys() {
-        return new Keys();
+        return new Keys(new PublicKey("543","23423"),new PrivateKey("45654","345423","23454325"));
     }
 
     // Encrypt message
