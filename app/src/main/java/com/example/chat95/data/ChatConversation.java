@@ -95,7 +95,6 @@ public class ChatConversation {
         return KIC;
     }
 
-    @Exclude
     public void setKIC(String KIC) {
         this.KIC = KIC;
     }
