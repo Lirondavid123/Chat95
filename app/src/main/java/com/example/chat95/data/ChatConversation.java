@@ -9,14 +9,16 @@ public class ChatConversation {
     private String chosenUid;
     private String sender, receiver;
     private String receiverProfilePicture;
-    private boolean isApproved;
+    private Boolean isApproved;
     private String KIC;
 
     public ChatConversation() {
 
     }
 
-    public ChatConversation(PublicKey publicKey, String conversationId, String sender, String receiver, String sentToProfilePicture, boolean isApproved, String userName, String chosenUid) {
+    public ChatConversation(PublicKey publicKey, String conversationId,
+                            String sender, String receiver, String sentToProfilePicture, Boolean isApproved,
+                            String userName, String chosenUid, String KIC) {
         this.publicKey = publicKey;
         this.conversationId = conversationId;
         this.sender = sender;
@@ -25,6 +27,7 @@ public class ChatConversation {
         this.isApproved = isApproved;
         this.userName = userName;
         this.chosenUid = chosenUid;
+        this.KIC = KIC;
     }
 
     public String getConversationId() {
@@ -59,11 +62,11 @@ public class ChatConversation {
         this.receiverProfilePicture = receiverProfilePicture;
     }
 
-    public boolean isApproved() {
+    public Boolean isApproved() {
         return isApproved;
     }
 
-    public void setApproved(boolean approved) {
+    public void setApproved(Boolean approved) {
         isApproved = approved;
     }
 
@@ -98,7 +101,6 @@ public class ChatConversation {
     public void setKIC(String KIC) {
         this.KIC = KIC;
     }
-    //
 }
 
 
