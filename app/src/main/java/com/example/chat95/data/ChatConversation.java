@@ -1,33 +1,38 @@
 package com.example.chat95.data;
 
+import com.google.firebase.database.Exclude;
+
 public class ChatConversation {
-    private String chatId;
+    private PublicKey publicKey;
+    private String conversationId;
     private String userName;
     private String chosenUid;
-    private String sender,receiver;
+    private String sender, receiver;
     private String receiverProfilePicture;
     private boolean isApproved;
+    private String KIC;
 
-    public ChatConversation(){
+    public ChatConversation() {
 
     }
 
-    public ChatConversation(String chatId, String sender, String receiver, String sentToProfilePicture, boolean isApproved,String userName, String chosenUid) {
-        this.chatId = chatId;
+    public ChatConversation(PublicKey publicKey, String conversationId, String sender, String receiver, String sentToProfilePicture, boolean isApproved, String userName, String chosenUid) {
+        this.publicKey = publicKey;
+        this.conversationId = conversationId;
         this.sender = sender;
         this.receiver = receiver;
         this.receiverProfilePicture = sentToProfilePicture;
         this.isApproved = isApproved;
-        this.userName=userName;
-        this.chosenUid=chosenUid;
+        this.userName = userName;
+        this.chosenUid = chosenUid;
     }
 
-    public String getChatId() {
-        return chatId;
+    public String getConversationId() {
+        return conversationId;
     }
 
-    public void setChatId(String chatId) {
-        this.chatId = chatId;
+    public void setConversationId(String conversationId) {
+        this.conversationId = conversationId;
     }
 
     public String getSender() {
@@ -76,6 +81,23 @@ public class ChatConversation {
 
     public void setChosenUid(String chosenUid) {
         this.chosenUid = chosenUid;
+    }
+
+    public PublicKey getPublicKey() {
+        return publicKey;
+    }
+
+    public void setPublicKey(PublicKey publicKey) {
+        this.publicKey = publicKey;
+    }
+
+    public String getKIC() {
+        return KIC;
+    }
+
+    @Exclude
+    public void setKIC(String KIC) {
+        this.KIC = KIC;
     }
     //
 }

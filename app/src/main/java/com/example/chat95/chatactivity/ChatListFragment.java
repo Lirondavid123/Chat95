@@ -99,7 +99,7 @@ public class ChatListFragment extends Fragment {
 
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getContext());
         binding.chatListRecycler.setLayoutManager(linearLayoutManager);
-        binding.chatToolbar.getOverflowIcon().setColorFilter(Color.WHITE , PorterDuff.Mode.SRC_ATOP);
+        binding.chatToolbar.getOverflowIcon().setColorFilter(Color.WHITE, PorterDuff.Mode.SRC_ATOP);
 
 /*
         callingIntent = ChatActivity.callingIntent;
@@ -114,7 +114,7 @@ public class ChatListFragment extends Fragment {
         }else
 */
         setListeners();
-        prepareDatabaseQuery();
+
     }
 
     private void setListeners() {
@@ -135,6 +135,7 @@ public class ChatListFragment extends Fragment {
         usersViewModel = ViewModelProviders.of(getActivity()).get(UsersViewModel.class);
     }
 
+
     private void showChatConversation(Bundle bundle) {
         Navigation.findNavController(getView()).navigate(R.id.action_chatListFragment_to_chatConversationFragment, bundle);
     }
@@ -142,17 +143,21 @@ public class ChatListFragment extends Fragment {
     private void prepareDatabaseQuery() {
         final Query conversationsRef = FirebaseDatabase.getInstance().getReference()
                 .child(ConstantValues.CHAT_CONVERSATIONS).child(ChatActivity.getFireBaseAuth().getUid());
-
-        conversationsRef.addListenerForSingleValueEvent(new ValueEventListener() {
+// TODO: 01/06/2020 edit the real time factor 
+//         conversationsListener = conversationsRef.addListenerForSingleValueEvent(new ValueEventListener() {
+        conversationsRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 if (!dataSnapshot.hasChildren()) {
                     Toast.makeText(getContext(), "No chats to display yet...send some greetings to others!", Toast.LENGTH_LONG).show();
-                    if (firebaseRecyclerAdapter != null) {
+/*                    if (firebaseRecyclerAdapter != null) {
                         firebaseRecyclerAdapter.stopListening();
-                    }
+                    }*/
                 } else {
-                    displayConversationsList(binding.chatListRecycler, conversationsRef);
+                    conversationsRef.removeEventListener(this);
+                    if (binding != null || binding.chatListRecycler != null) {
+                        displayConversationsList(binding.chatListRecycler, conversationsRef);
+                    }
                 }
             }
 
@@ -242,6 +247,13 @@ public class ChatListFragment extends Fragment {
     public void onStart() {
         super.onStart();
         Log.d(TAG, "onStart: ");
+
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        prepareDatabaseQuery();
     }
 
     @Override
@@ -249,6 +261,11 @@ public class ChatListFragment extends Fragment {
         super.onStop();
         Log.d(TAG, "onStop: ");
         callingIntent = null;
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
     }
 
     @Override

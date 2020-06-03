@@ -86,13 +86,21 @@ public class ChatActivity extends AppCompatActivity {
         Des des=new Des();
         //String key="Abuft63a";
         String text = "???????????????????????? ";
+
+        LocalDataBase.setMyDAO(AppDatabase.getAppDatabase(getApplicationContext()).ConversationDAO());
+
+
+/*        Des des=new Des();
         String resultText;
-        String myKey= KeyGenerator.generateKey(16);
-        resultText=Des.encrypt(text,"AABB09182736CCDD");
-        resultText=Des.decrypt(resultText,"AABB09182736CCDD");
-        //Log.d(TAG, "onStart: encryptOne: "+resultText);
+//        String myKey= KeyGenerator.generateKey(16);
+        String text = "123456ABCD132536";
+        String key = "AABB09182736CCDD";
+        resultText=des.encryptOnce(text,key);
+        Log.d(TAG, "onStart: encryptOne: "+resultText);
         //resultText= Des.encrypt("Hi my name is or",myKey);
         Log.d(TAG, "inside on Start");
+        String decrypted=des.decrypt(resultText,key);
+        Log.d(TAG, "onStart: decrypted: "+decrypted);*/
         if (fireBaseAuth.getCurrentUser()== null) {    // if the user is not logged in
             sendUserToLogin();
         }

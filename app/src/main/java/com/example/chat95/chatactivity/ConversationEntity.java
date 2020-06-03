@@ -8,84 +8,125 @@ import androidx.room.PrimaryKey;
 @Entity
 public class ConversationEntity {
 
-    @PrimaryKey@NonNull
-    private String uid;
+    @PrimaryKey
+    @NonNull
+    private String conversationId;
 
     @ColumnInfo
-    private String myprivateKey;
+    private String myE;
+    @ColumnInfo
+    private String myN;
 
     @ColumnInfo
-    private String mypublicKey;
+    private String d;
+    @ColumnInfo
+    private String p;
 
     @ColumnInfo
-    private String partnerKey;
-
-    @ColumnInfo
-    private String partnerMod;
-
+    private String q;
     @ColumnInfo
     private String SymmetricKey;
+    @ColumnInfo
+    private String foreignE;
+    @ColumnInfo
+    private String foreignN;
+    @ColumnInfo
+    private boolean isApproved;
 
+    public ConversationEntity() {
+    }
 
-    public ConversationEntity(){}
-
-
-    public ConversationEntity(@NonNull String uid, String myprivateKey, String mypublicKey, String partnerKey, String partnerMod, String symmetricKey) {
-        this.uid = uid;
-        this.myprivateKey = myprivateKey;
-        this.mypublicKey = mypublicKey;
-        this.partnerKey = partnerKey;
-        this.partnerMod = partnerMod;
+    public ConversationEntity(@NonNull String conversationId, String myE, String myN, String d, String p, String q, String symmetricKey, String foreignE, String foreignN, boolean isApproved) {
+        this.conversationId = conversationId;
+        this.myE = myE;
+        this.myN = myN;
+        this.d = d;
+        this.p = p;
+        this.q = q;
         SymmetricKey = symmetricKey;
+        this.foreignE = foreignE;
+        this.foreignN = foreignN;
+        this.isApproved = isApproved;
     }
 
     @NonNull
-    public String getUid() {
-        return uid;
+    public String getConversationId() {
+        return conversationId;
     }
 
-    public String getMyprivateKey() {
-        return myprivateKey;
+    public void setConversationId(@NonNull String conversationId) {
+        this.conversationId = conversationId;
     }
 
-    public String getMypublicKey() {
-        return mypublicKey;
+    public String getMyE() {
+        return myE;
     }
 
-    public String getPartnerKey() {
-        return partnerKey;
+    public void setMyE(String myE) {
+        this.myE = myE;
     }
 
-    public String getPartnerMod() {
-        return partnerMod;
+    public String getD() {
+        return d;
+    }
+
+    public void setD(String d) {
+        this.d = d;
+    }
+
+    public String getP() {
+        return p;
+    }
+
+    public void setP(String p) {
+        this.p = p;
+    }
+
+    public String getQ() {
+        return q;
+    }
+
+    public void setQ(String q) {
+        this.q = q;
+    }
+
+    public String getMyN() {
+        return myN;
+    }
+
+    public void setMyN(String myN) {
+        this.myN = myN;
     }
 
     public String getSymmetricKey() {
         return SymmetricKey;
     }
 
-
-    public void setUid(String uid) {
-        this.uid = uid;
-    }
-
-    public void setMyprivateKey(String myprivateKey) {
-        this.myprivateKey = myprivateKey;
-    }
-
-    public void setMypublicKey(String mypublicKey) {
-        this.mypublicKey = mypublicKey;
-    }
-
-    public void setPartnerKey(String partnerKey) {
-        this.partnerKey = partnerKey;
-    }
-
-    public void setPartnerMod(String partnerMod) {
-        this.partnerMod = partnerMod;
-    }
-
     public void setSymmetricKey(String symmetricKey) {
         SymmetricKey = symmetricKey;
+    }
+
+    public String getForeignE() {
+        return foreignE;
+    }
+
+    public void setForeignE(String foreignE) {
+        this.foreignE = foreignE;
+    }
+
+    public String getForeignN() {
+        return foreignN;
+    }
+
+    public void setForeignN(String foreignN) {
+        this.foreignN = foreignN;
+    }
+
+    public boolean isApproved() {
+        return isApproved;
+    }
+
+    public void setApproved(boolean approved) {
+        isApproved = approved;
     }
 }
