@@ -114,7 +114,7 @@ public class ChatListFragment extends Fragment {
         }else
 */
         setListeners();
-        prepareDatabaseQuery();
+
     }
 
     private void setListeners() {
@@ -134,6 +134,7 @@ public class ChatListFragment extends Fragment {
         chatViewModel = ViewModelProviders.of(getActivity()).get(ChatViewModel.class);
         usersViewModel = ViewModelProviders.of(getActivity()).get(UsersViewModel.class);
     }
+
 
     private void showChatConversation(Bundle bundle) {
         Navigation.findNavController(getView()).navigate(R.id.action_chatListFragment_to_chatConversationFragment, bundle);
@@ -246,6 +247,13 @@ public class ChatListFragment extends Fragment {
     public void onStart() {
         super.onStart();
         Log.d(TAG, "onStart: ");
+
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        prepareDatabaseQuery();
     }
 
     @Override
@@ -253,6 +261,11 @@ public class ChatListFragment extends Fragment {
         super.onStop();
         Log.d(TAG, "onStop: ");
         callingIntent = null;
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
     }
 
     @Override
