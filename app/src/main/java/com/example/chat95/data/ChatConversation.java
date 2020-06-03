@@ -1,15 +1,18 @@
 package com.example.chat95.data;
 
+import com.google.firebase.database.Exclude;
+
 public class ChatConversation {
     private PublicKey publicKey;
     private String conversationId;
     private String userName;
     private String chosenUid;
-    private String sender,receiver;
+    private String sender, receiver;
     private String receiverProfilePicture;
     private boolean isApproved;
+    private String KIC;
 
-    public ChatConversation(){
+    public ChatConversation() {
 
     }
 
@@ -20,8 +23,8 @@ public class ChatConversation {
         this.receiver = receiver;
         this.receiverProfilePicture = sentToProfilePicture;
         this.isApproved = isApproved;
-        this.userName=userName;
-        this.chosenUid=chosenUid;
+        this.userName = userName;
+        this.chosenUid = chosenUid;
     }
 
     public String getConversationId() {
@@ -86,6 +89,15 @@ public class ChatConversation {
 
     public void setPublicKey(PublicKey publicKey) {
         this.publicKey = publicKey;
+    }
+
+    public String getKIC() {
+        return KIC;
+    }
+
+    @Exclude
+    public void setKIC(String KIC) {
+        this.KIC = KIC;
     }
     //
 }

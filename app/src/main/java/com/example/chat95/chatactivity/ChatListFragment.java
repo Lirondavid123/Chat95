@@ -143,7 +143,8 @@ public class ChatListFragment extends Fragment {
         final Query conversationsRef = FirebaseDatabase.getInstance().getReference()
                 .child(ConstantValues.CHAT_CONVERSATIONS).child(ChatActivity.getFireBaseAuth().getUid());
 // TODO: 01/06/2020 edit the real time factor 
-        conversationsRef.addListenerForSingleValueEvent(new ValueEventListener() {
+//         conversationsListener = conversationsRef.addListenerForSingleValueEvent(new ValueEventListener() {
+        conversationsRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 if (!dataSnapshot.hasChildren()) {
@@ -152,6 +153,7 @@ public class ChatListFragment extends Fragment {
                         firebaseRecyclerAdapter.stopListening();
                     }*/
                 } else {
+                    conversationsRef.removeEventListener(this);
                     if (binding != null || binding.chatListRecycler != null) {
                         displayConversationsList(binding.chatListRecycler, conversationsRef);
                     }
