@@ -266,6 +266,9 @@ public class ChatListFragment extends Fragment {
     @Override
     public void onPause() {
         super.onPause();
+        if(firebaseRecyclerAdapter!=null){
+            firebaseRecyclerAdapter.stopListening();
+        }
     }
 
     @Override

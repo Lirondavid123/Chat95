@@ -173,6 +173,7 @@ public class ChatConversationFragment extends Fragment {
             setConversationApproval(isConversationPartiallyApproved, chosenChatConversation.getSender());
             //if this user is the sender, wait for the other user's approval
             if (chosenChatConversation.getSender().equals(ChatActivity.getFireBaseAuth().getUid()))
+                Log.d(TAG, "getConversationDetails: set approval listener");
                 setAprrovalListener();
         }
 
@@ -206,6 +207,7 @@ public class ChatConversationFragment extends Fragment {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                         if ((Boolean) dataSnapshot.child(ConstantValues.APPROVED).getValue() == true) {
+                            Log.d(TAG, "onDataChange: user approved conversation");
                             updateLocalDB(dataSnapshot.getValue(ChatConversation.class));
 
 
@@ -223,10 +225,10 @@ public class ChatConversationFragment extends Fragment {
                                     , null);
                             dbRef.updateChildren(childUpdates);
                             if (binding != null) {
+                                Log.d(TAG, "onDataChange: prepare database query after user approved");
                                 prepareUserInputField();
                                 prepareDatabaseQuery();
                             }
-
                         }
                     }
 
@@ -403,6 +405,7 @@ public class ChatConversationFragment extends Fragment {
                             binding.approveMessageLayout.setVisibility(View.GONE);
                             binding.chatUserInput.setVisibility(View.VISIBLE);
                             binding.chatConversationSendBtn.setVisibility(View.VISIBLE);
+                            prepareDatabaseQuery();
                         }
                     }
                 });
@@ -491,7 +494,9 @@ public class ChatConversationFragment extends Fragment {
 
         messageRef.setValue(chatMessage);
         // TODO: 03/06/2020 fix  firebaseRecyclerAdapter.getItemCount()(on null pointer exception)
-        binding.chatConversationRecyclerview.scrollToPosition(firebaseRecyclerAdapter.getItemCount() - 1);
+        if (firebaseRecyclerAdapter != null) {
+            binding.chatConversationRecyclerview.scrollToPosition(firebaseRecyclerAdapter.getItemCount() - 1);
+        }
     }
 
     private void createNewConversationInDB() {
@@ -507,14 +512,17 @@ public class ChatConversationFragment extends Fragment {
         chosenChatConversation = new ChatConversation(publicKey, conversationId,
                 ChatActivity.getFireBaseAuth().getUid(),
                 chosenUid,
-                ChatActivity.getLoggedUser().getProfileImage(), false, ChatActivity.getLoggedUser().getUserFullName(), ChatActivity.getFireBaseAuth().getUid());
+                ChatActivity.getLoggedUser().getProfileImage(),
+                false,
+                ChatActivity.getLoggedUser().getUserFullName(),
+                ChatActivity.getFireBaseAuth().getUid(),"");
 
         childUpdates.put(String.format("/%s/%s/%s", ConstantValues.CHAT_CONVERSATIONS, chosenUid, ChatActivity.getCurrentUser().getUid()), chosenChatConversation);
 
         ChatConversation chatConversation = new ChatConversation(publicKey, conversationId,
                 ChatActivity.getLoggedUser().getUserId(),
                 chosenUid,
-                photoUrl, false, userName, chosenUid);
+                photoUrl, false, userName, chosenUid,"");
         chatViewModel.setChosenChatConversation(chatConversation);
 
         childUpdates.put(String.format("/%s/%s/%s",
