@@ -221,7 +221,7 @@ public class ChatConversationFragment extends Fragment {
                             childUpdates.put(String.format("/%s/%s/%s/%s",
                                     ConstantValues.CHAT_CONVERSATIONS
                                     , ChatActivity.getFireBaseAuth().getUid()
-                                    , chosenUid, "KIC")
+                                    , chosenUid, "kic")
                                     , null);
                             dbRef.updateChildren(childUpdates);
                             if (binding != null) {
@@ -240,7 +240,7 @@ public class ChatConversationFragment extends Fragment {
     }
 
     private void updateLocalDB(ChatConversation chatConversation) {
-        String KIC = chatConversation.getKIC();
+        String KIC = chatConversation.getKic();
         PublicKey foreignPublicKey = chatConversation.getPublicKey();
         String symmetricKey;
         ConversationEntity conversationEntity = LocalDataBase.retrieveConversationData(conversationId);
@@ -384,7 +384,7 @@ public class ChatConversationFragment extends Fragment {
                 childUpdates.put(String.format("/%s/%s/%s/%s",
                         ConstantValues.CHAT_CONVERSATIONS
                         , ChatActivity.getFireBaseAuth().getUid()
-                        , chosenUid, "KIC")
+                        , chosenUid, "kic")
                         , KIC);
                 childUpdates.put(String.format("/%s/%s/%s/%s",
                         ConstantValues.CHAT_CONVERSATIONS
