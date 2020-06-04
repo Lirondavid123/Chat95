@@ -28,12 +28,36 @@ public class ChatConversation {
         this.kic = kic;
     }
 
+    public PublicKey getPublicKey() {
+        return publicKey;
+    }
+
+    public void setPublicKey(PublicKey publicKey) {
+        this.publicKey = publicKey;
+    }
+
     public String getConversationId() {
         return conversationId;
     }
 
     public void setConversationId(String conversationId) {
         this.conversationId = conversationId;
+    }
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
+
+    public String getChosenUid() {
+        return chosenUid;
+    }
+
+    public void setChosenUid(String chosenUid) {
+        this.chosenUid = chosenUid;
     }
 
     public String getSender() {
@@ -60,36 +84,12 @@ public class ChatConversation {
         this.receiverProfilePicture = receiverProfilePicture;
     }
 
-    public Boolean isApproved() {
+    public Boolean getApproved() {
         return isApproved;
     }
 
     public void setApproved(Boolean approved) {
         isApproved = approved;
-    }
-
-    public String getUserName() {
-        return userName;
-    }
-
-    public void setUserName(String userName) {
-        this.userName = userName;
-    }
-
-    public String getChosenUid() {
-        return chosenUid;
-    }
-
-    public void setChosenUid(String chosenUid) {
-        this.chosenUid = chosenUid;
-    }
-
-    public PublicKey getPublicKey() {
-        return publicKey;
-    }
-
-    public void setPublicKey(PublicKey publicKey) {
-        this.publicKey = publicKey;
     }
 
     public String getKic() {
