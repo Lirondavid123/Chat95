@@ -5,6 +5,8 @@ import com.example.chat95.data.PrivateKey;
 import com.example.chat95.data.PublicKey;
 
 import java.math.BigInteger;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Random;
 
 public class Rsa {
@@ -61,18 +63,40 @@ public class Rsa {
         return new Keys(new PublicKey("543","23423"),new PrivateKey("45654","345423","23454325"));
     }
 
-    // Encrypt message
+    // Encrypt message using public key
     public static String encrypt(String text, PublicKey foreignPublicKey) {
         // TODO: 02/06/2020
-
-        return text + "$$";
+        BigInteger e = new BigInteger(foreignPublicKey.getE());
+        BigInteger n = new BigInteger(foreignPublicKey.getN());
+        return (new BigInteger(text)).modPow(e, n).toString();
+       // return text + "$$";
     }
 
-    // Decrypt message
+    // Encrypt message using private key
+    public static String encrypt(String text, PrivateKey privateKey) {
+        // TODO: 02/06/2020
+        BigInteger d = new BigInteger(privateKey.getD());
+        BigInteger n = new BigInteger(privateKey.getN());
+        return (new BigInteger(text)).modPow(d.modInverse(n), n).toString();
+        // return text + "$$";
+    }
+
+    // Decrypt message using private key
     public static String decrypt(String text, PrivateKey privateKey) {
         // TODO: 02/06/2020
+        BigInteger d = new BigInteger(privateKey.getD());
+        BigInteger n = new BigInteger(privateKey.getN());
+        return (new BigInteger(text)).modPow(d, n).toString();
+        // return text.substring(0, text.length() - 2);
+    }
 
-        return text.substring(0, text.length() - 2);
+    // Decrypt message using public key
+    public static String decrypt(String text, PublicKey foreignPublicKey) {
+        // TODO: 02/06/2020
+        BigInteger e = new BigInteger(foreignPublicKey.getE());
+        BigInteger n = new BigInteger(foreignPublicKey.getN());
+        return (new BigInteger(text)).modPow(e.modInverse(n), n).toString();
+        // return text.substring(0, text.length() - 2);
     }
     /*// Encrypt message
     public byte[] encrypt(byte[] message) {
@@ -84,16 +108,45 @@ public class Rsa {
         return (new BigInteger(message)).modPow(d, N).toByteArray();
     }*/
 
+    public static String getCryptoHash(String input, String algorithm) {
+        try {
+            //MessageDigest classes Static getInstance method is called with MD5 hashing
+            MessageDigest msgDigest = MessageDigest.getInstance(algorithm);
+
+            //digest() method is called to calculate message digest of the input
+            //digest() return array of byte.
+            byte[] inputDigest = msgDigest.digest(input.getBytes());
+
+            // Convert byte array into signum representation
+            // BigInteger class is used, to convert the resultant byte array into its signum representation
+            BigInteger inputDigestBigInt = new BigInteger(1, inputDigest);
+
+            // Convert the input digest into hex value
+            String hashtext = inputDigestBigInt.toString(16);
+
+            //Add preceding 0's to pad the hashtext to make it 32 bit
+            while (hashtext.length() < 32) {
+                hashtext = "0" + hashtext;
+            }
+            return hashtext;
+        }
+        // Catch block to handle the scenarios when an unsupported message digest algorithm is provided.
+        catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     public static String signature(String textMessage, PrivateKey privateKey) {
         // TODO: 02/06/2020
-
-        return KeyGenerator.generateKey(6);
+        String hashedMessage = getCryptoHash(textMessage, "MD5");
+        return encrypt(hashedMessage, privateKey);
+       // return KeyGenerator.generateKey(6);
     }
 
     public static boolean verify(String textMessage, String signature, PublicKey foreignPublicKey) {
         // TODO: 02/06/2020
-
-        return true;
+        String hashedMessage = getCryptoHash(textMessage, "MD5");
+        String expectedHashMessage = decrypt(signature, foreignPublicKey);
+        return hashedMessage.equals(expectedHashMessage);
     }
 }
