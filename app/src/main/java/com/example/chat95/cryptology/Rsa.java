@@ -60,7 +60,18 @@ public class Rsa {
     }
 
     public static Keys createKeys() {
-        return new Keys(new PublicKey("543","23423"),new PrivateKey("45654","345423","23454325"));
+        int bitLength = 1024;
+        Random r = new Random();
+        BigInteger p = BigInteger.probablePrime(bitLength, r);
+        BigInteger q = BigInteger.probablePrime(bitLength, r);
+        BigInteger N = p.multiply(q);
+        BigInteger phi = p.subtract(BigInteger.ONE).multiply(q.subtract(BigInteger.ONE));
+        BigInteger e = BigInteger.probablePrime(bitLength / 2, r);
+        while (phi.gcd(e).compareTo(BigInteger.ONE) > 0 && e.compareTo(phi) < 0) {
+            e.add(BigInteger.ONE);
+        }
+        BigInteger d = e.modInverse(phi);
+        return new Keys(new PublicKey(e.toString(16),N.toString(16)),new PrivateKey(p.toString(16),q.toString(16),d.toString(16)));
     }
 
     // Encrypt message using public key
@@ -68,7 +79,7 @@ public class Rsa {
         // TODO: 02/06/2020
         BigInteger e = new BigInteger(foreignPublicKey.getE());
         BigInteger n = new BigInteger(foreignPublicKey.getN());
-        return (new BigInteger(text)).modPow(e, n).toString();
+        return (new BigInteger(text)).modPow(e, n).toString(16);
        // return text + "$$";
     }
 
@@ -77,7 +88,7 @@ public class Rsa {
         // TODO: 02/06/2020
         BigInteger d = new BigInteger(privateKey.getD());
         BigInteger n = new BigInteger(privateKey.getN());
-        return (new BigInteger(text)).modPow(d.modInverse(n), n).toString();
+        return (new BigInteger(text)).modPow(d.modInverse(n), n).toString(16);
         // return text + "$$";
     }
 
@@ -86,7 +97,7 @@ public class Rsa {
         // TODO: 02/06/2020
         BigInteger d = new BigInteger(privateKey.getD());
         BigInteger n = new BigInteger(privateKey.getN());
-        return (new BigInteger(text)).modPow(d, n).toString();
+        return (new BigInteger(text)).modPow(d, n).toString(16);
         // return text.substring(0, text.length() - 2);
     }
 
@@ -95,7 +106,7 @@ public class Rsa {
         // TODO: 02/06/2020
         BigInteger e = new BigInteger(foreignPublicKey.getE());
         BigInteger n = new BigInteger(foreignPublicKey.getN());
-        return (new BigInteger(text)).modPow(e.modInverse(n), n).toString();
+        return (new BigInteger(text)).modPow(e.modInverse(n), n).toString(16);
         // return text.substring(0, text.length() - 2);
     }
     /*// Encrypt message

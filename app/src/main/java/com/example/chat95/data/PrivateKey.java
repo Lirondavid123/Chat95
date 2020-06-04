@@ -43,6 +43,6 @@ public class PrivateKey {
     public String getN() {
         BigInteger q = new BigInteger(this.q);
         BigInteger p = new BigInteger(this.p);
-        return q.multiply(p).toString();
+        return q.multiply(p).toString(16);
     }
 }
