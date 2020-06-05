@@ -21,6 +21,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 import android.widget.Toolbar;
 
 import com.bumptech.glide.Glide;
@@ -45,12 +46,13 @@ public class SearchUsersFragment extends Fragment {
     private Query query;
     private EditText searchBar;
     private Toolbar toolbar;
+
     public SearchUsersFragment() {
     }
+
     public static SearchUsersFragment newInstance() {
         return new SearchUsersFragment();
     }
-
 
 
     @Override
@@ -64,12 +66,12 @@ public class SearchUsersFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        searchedUsersRecycler=view.findViewById(R.id.searched_users_recycler);
+        searchedUsersRecycler = view.findViewById(R.id.searched_users_recycler);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getContext());
         linearLayoutManager.setReverseLayout(true);
         linearLayoutManager.setStackFromEnd(true);
         searchedUsersRecycler.setLayoutManager(linearLayoutManager);
-        searchBar=view.findViewById(R.id.search_bar);
+        searchBar = view.findViewById(R.id.search_bar);
         setBarListener();
         searchBar.setText("");
     }
@@ -77,19 +79,20 @@ public class SearchUsersFragment extends Fragment {
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        mViewModel = ViewModelProviders.of(getActivity()).get(UsersViewModel.class);    }
+        mViewModel = ViewModelProviders.of(getActivity()).get(UsersViewModel.class);
+    }
 
     @Override
     public void onStop() {
         super.onStop();
-        Log.d("SearchUsersFragment","On Stop");
-        if(firebaseRecyclerAdapter!=null){
+        Log.d("SearchUsersFragment", "On Stop");
+        if (firebaseRecyclerAdapter != null) {
             firebaseRecyclerAdapter.stopListening();
         }
     }
 
     void setBarListener() {
-        Log.d("SearchUsersFragment","Set Bar Listener");
+        Log.d("SearchUsersFragment", "Set Bar Listener");
         searchBar.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -104,9 +107,9 @@ public class SearchUsersFragment extends Fragment {
 
             @Override
             public void afterTextChanged(Editable s) {
-                if(!(s.toString().equals(""))){
+                if (!(s.toString().equals(""))) {
 
-                    if(firebaseRecyclerAdapter!=null){
+                    if (firebaseRecyclerAdapter != null) {
                         firebaseRecyclerAdapter.stopListening();
                     }
                     query = FirebaseDatabase.getInstance().getReference().child(ConstantValues.USERS)
@@ -115,10 +118,9 @@ public class SearchUsersFragment extends Fragment {
                     query.addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
                         public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                            if(!dataSnapshot.hasChildren()){
+                            if (!dataSnapshot.hasChildren()) {
                                 //Toast.makeText(getActivity(), "no matches were found", Toast.LENGTH_SHORT).show();
-                            }
-                            else{
+                            } else {
                                 setSearchedUsersList(query);
 
                                 //Toast.makeText(getActivity(), query.getRef().get, Toast.LENGTH_SHORT).show();
@@ -137,7 +139,6 @@ public class SearchUsersFragment extends Fragment {
     }
 
 
-
     public void setSearchedUsersList(Query query) {
         //Toast.makeText(getActivity(), "setSearchedUsersList", Toast.LENGTH_SHORT).show();
 
@@ -150,7 +151,7 @@ public class SearchUsersFragment extends Fragment {
             @NonNull
             @Override
             public SearchedUsersViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-                Log.d("SearchUsersFragment","On Create view holder");
+                Log.d("SearchUsersFragment", "On Create view holder");
                 View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.user_in_recycler, parent, false);
                 SearchedUsersViewHolder viewHolder = new SearchedUsersViewHolder(view);
                 return viewHolder;
@@ -159,20 +160,24 @@ public class SearchUsersFragment extends Fragment {
             @Override
             protected void onBindViewHolder(@NonNull SearchedUsersViewHolder holder, int position, @NonNull final User model) {
                 //holder.userNode = model;
-                Log.d("SearchUsersFragment","On bind");
-                if(model==null){
-                }
-                else{
+                Log.d("SearchUsersFragment", "On bind");
+                if (model == null) {
+                } else {
                 }
                 Glide.with(getActivity()).load(model.getProfileImage()).placeholder(R.drawable.empty_profile_image).into(holder.userPhoto);
-                holder.userName.setText(model.getUserFirstName()+" "+model.getUserLastName());
-                holder.itemView.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        openChatConversation(model);
-                    }
-                });
-            }
+                holder.userName.setText(model.getUserFirstName() + " " + model.getUserLastName());
+                final boolean isCurrentUserNode=model.getUserId().equals(ChatActivity.getFireBaseAuth().getUid());
+                    holder.itemView.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            if(!isCurrentUserNode){
+                                openChatConversation(model);}
+                            else {
+                                Toast.makeText(getContext(), "Cannot open a conversation with yourself", Toast.LENGTH_SHORT).show();
+                            }
+                        }
+                    });
+                }
         };
         searchedUsersRecycler.setAdapter(firebaseRecyclerAdapter);
 
@@ -183,9 +188,9 @@ public class SearchUsersFragment extends Fragment {
         mViewModel.setUserId(model.getUserId());
         mViewModel.setChosenPhotoUrl(model.getProfileImage());
         mViewModel.setUserName(model.getUserFullName());
-        Bundle bundle=new Bundle();
-        bundle.putBoolean("doesConversationExist",false);
-        Navigation.findNavController(getView()).navigate(R.id.chatConversationFragment,bundle);
+        Bundle bundle = new Bundle();
+        bundle.putBoolean("doesConversationExist", false);
+        Navigation.findNavController(getView()).navigate(R.id.chatConversationFragment, bundle);
     }
 
 
