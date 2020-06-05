@@ -27,4 +27,12 @@ public class PublicKey {
     public void setN(String n) {
         this.n = n;
     }
+
+    @Override
+    public String toString() {
+        return "PublicKey{" +
+                "e='" + e + '\'' +
+                ", n='" + n + '\'' +
+                '}';
+    }
 }

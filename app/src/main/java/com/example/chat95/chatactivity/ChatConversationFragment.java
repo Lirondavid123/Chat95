@@ -166,6 +166,7 @@ public class ChatConversationFragment extends Fragment {
                 updateLocalDB(chatConversation);
                 deleteKeysFromDB();
             } else {
+                Log.d(TAG, "getConversationDetails: conversation was fully approved");
                 updateCryptoConversationValues(conversationEntity.getSymmetricKey()
                         , new PublicKey(conversationEntity.getForeignE(), conversationEntity.getForeignN()),
                         new PrivateKey(conversationEntity.getP(), conversationEntity.getQ(), conversationEntity.getD()));
@@ -403,12 +404,12 @@ public class ChatConversationFragment extends Fragment {
                 binding.declineBtn.setEnabled(false);
                 binding.approveBtn.setEnabled(false);
                 // TODO: 01/06/2020 crypto- replace temporary methods with real ones
-                PublicKey foreignPublicKey = chosenChatConversation.getPublicKey();
-                String symmetricKey = KeyGenerator.generateKey(24);
+                foreignPublicKey = chosenChatConversation.getPublicKey();
+                symmetricKey = KeyGenerator.generateKey(24);
                 String KIC = Rsa.encrypt(symmetricKey, foreignPublicKey);
 
                 Keys keys = Rsa.createKeys();
-                PrivateKey privateKey = keys.getPrivateKey();
+                privateKey = keys.getPrivateKey();
                 PublicKey publicKey = keys.getPublicKey();
                 //save keys to local database
                 LocalDataBase.InsertConversationData(new ConversationEntity(conversationId, publicKey.getE()
