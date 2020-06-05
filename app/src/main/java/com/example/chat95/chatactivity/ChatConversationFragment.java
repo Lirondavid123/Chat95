@@ -144,7 +144,6 @@ public class ChatConversationFragment extends Fragment {
     }
 
 
-
     /**
      * called when there is a certain existing conversation,that has been approved or not yet, by two users
      * isConversationPartiallyApproved- indicates if the conversation was approved by one user
@@ -176,9 +175,10 @@ public class ChatConversationFragment extends Fragment {
             Log.d(TAG, "getConversationDetails: conversation is not approved");
             setConversationApproval(isConversationPartiallyApproved, chosenChatConversation.getSender());
             //if this user is the sender, wait for the other user's approval
-            if (chosenChatConversation.getSender().equals(ChatActivity.getFireBaseAuth().getUid()))
+            if (chosenChatConversation.getSender().equals(ChatActivity.getFireBaseAuth().getUid())) {
                 Log.d(TAG, "getConversationDetails: set approval listener");
-            setAprrovalListener();
+                setAprrovalListener();
+            }
         }
     }
 
@@ -187,12 +187,12 @@ public class ChatConversationFragment extends Fragment {
 //        dbRef.child(ConstantValues.CHAT_CONVERSATIONS)
                 .child(ChatActivity.getFireBaseAuth().getUid())
                 .child(chosenUid).
-                child(ConstantValues.APPROVED)
+                        child(ConstantValues.APPROVED)
                 .addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                         Log.d(TAG, "onChildChanged: ");
-                        if((Boolean)dataSnapshot.getValue()){
+                        if ((Boolean) dataSnapshot.getValue()) {
                             Log.d(TAG, "onChildChanged: before retrievedatafromDB");
                             retrieveConversationFromDB();
                         }
@@ -296,7 +296,7 @@ public class ChatConversationFragment extends Fragment {
         ChatConversationFragment.symmetricKey = symmetricKey;
         ChatConversationFragment.foreignPublicKey = foreignPublicKey;
         ChatConversationFragment.privateKey = privateKey;
-        Log.d(TAG, String.format("updateCryptoConversationValues: symmetricKey = %s foreignPublicKey = %s  privateKey = %s",symmetricKey,foreignPublicKey,privateKey));
+        Log.d(TAG, String.format("updateCryptoConversationValues: symmetricKey = %s foreignPublicKey = %s  privateKey = %s", symmetricKey, foreignPublicKey, privateKey));
     }
 
 
@@ -631,10 +631,10 @@ public class ChatConversationFragment extends Fragment {
     }
 
     public void displayMessagesList(final RecyclerView chatMessagesRecyclerView, Query chatMessagesRef) {
-        if(approvedListener!=null){
+        if (approvedListener != null) {
             dbRef.removeEventListener(approvedListener);
         }
-        if(messagesListener!=null){
+        if (messagesListener != null) {
             dbRef.removeEventListener(messagesListener);
         }
         FirebaseRecyclerOptions<ChatMessage> options = new FirebaseRecyclerOptions
