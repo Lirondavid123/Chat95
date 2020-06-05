@@ -295,6 +295,7 @@ public class ChatConversationFragment extends Fragment {
         ChatConversationFragment.symmetricKey = symmetricKey;
         ChatConversationFragment.foreignPublicKey = foreignPublicKey;
         ChatConversationFragment.privateKey = privateKey;
+        Log.d(TAG, String.format("updateCryptoConversationValues: symmetricKey = %s foreignPublicKey = %s  privateKey = %s",symmetricKey,foreignPublicKey,privateKey));
     }
 
 
