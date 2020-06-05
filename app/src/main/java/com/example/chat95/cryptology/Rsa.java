@@ -6,6 +6,7 @@ import com.example.chat95.data.PrivateKey;
 import com.example.chat95.data.PublicKey;
 
 import java.math.BigInteger;
+import java.nio.charset.Charset;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Random;
@@ -77,7 +78,7 @@ public class Rsa {
             e.add(BigInteger.ONE);
         }
         BigInteger d = e.modInverse(phi);
-        return new Keys(new PublicKey(e.toString(16),N.toString(16)),new PrivateKey(p.toString(16),q.toString(16),d.toString(16)));
+        return new Keys(new PublicKey(e.toString(),N.toString()),new PrivateKey(p.toString(),q.toString(),d.toString()));
     }
 
 */
@@ -87,7 +88,8 @@ public class Rsa {
         // TODO: 02/06/2020
         BigInteger e = new BigInteger(foreignPublicKey.getE());
         BigInteger n = new BigInteger(foreignPublicKey.getN());
-        return (new BigInteger(text)).modPow(e, n).toString(16);
+        byte[] b = text.getBytes(Charset.forName("UTF-8"));
+        return new String((new BigInteger(b)).modPow(e, n).toByteArray());
        // return text + "$$";
     }
 
@@ -96,7 +98,8 @@ public class Rsa {
         // TODO: 02/06/2020
         BigInteger d = new BigInteger(privateKey.getD());
         BigInteger n = new BigInteger(privateKey.getN());
-        return (new BigInteger(text)).modPow(d.modInverse(n), n).toString(16);
+        byte[] b = text.getBytes(Charset.forName("UTF-8"));
+        return new String((new BigInteger(b)).modPow(d.modInverse(n), n).toByteArray());
         // return text + "$$";
     }
 
@@ -105,7 +108,8 @@ public class Rsa {
         // TODO: 02/06/2020
         BigInteger d = new BigInteger(privateKey.getD());
         BigInteger n = new BigInteger(privateKey.getN());
-        return (new BigInteger(text)).modPow(d, n).toString(16);
+        byte[] b = text.getBytes(Charset.forName("UTF-8"));
+        return new String((new BigInteger(b)).modPow(d, n).toByteArray());
         // return text.substring(0, text.length() - 2);
     }
 
@@ -117,7 +121,8 @@ public class Rsa {
         // TODO: 02/06/2020
         BigInteger e = new BigInteger(foreignPublicKey.getE());
         BigInteger n = new BigInteger(foreignPublicKey.getN());
-        return (new BigInteger(text)).modPow(e.modInverse(n), n).toString(16);
+        byte[] b = text.getBytes(Charset.forName("UTF-8"));
+        return new String((new BigInteger(b)).modPow(e.modInverse(n), n).toByteArray());
         // return text.substring(0, text.length() - 2);
     }
     */
@@ -147,7 +152,7 @@ public class Rsa {
             BigInteger inputDigestBigInt = new BigInteger(1, inputDigest);
 
             // Convert the input digest into hex value
-            String hashtext = inputDigestBigInt.toString(16);
+            String hashtext = inputDigestBigInt.toString();
 
             //Add preceding 0's to pad the hashtext to make it 32 bit
             while (hashtext.length() < 32) {
