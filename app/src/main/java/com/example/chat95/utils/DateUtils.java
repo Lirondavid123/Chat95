@@ -89,6 +89,9 @@ public class DateUtils {
     public static String getCurrentTimeString(){
         Date date = new Date(); // This object contains the current date value
         SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
+        // TODO: 04/06/2020  check option to reverse date order
+//        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
         return formatter.format(date);
     }
 }
