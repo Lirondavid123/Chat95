@@ -1,5 +1,7 @@
 package com.example.chat95.data;
 
+import java.math.BigInteger;
+
 public class PrivateKey {
     String p;
     String q;
@@ -36,5 +38,11 @@ public class PrivateKey {
 
     public void setD(String d) {
         this.d = d;
+    }
+
+    public String getN() {
+        BigInteger q = new BigInteger(this.q);
+        BigInteger p = new BigInteger(this.p);
+        return q.multiply(p).toString(16);
     }
 }
