@@ -57,11 +57,11 @@ public class Rsa {
         return privateKey;
     }
 
-    public static Keys createKeys() {
+/*    public static Keys createKeys() {
         return new Keys(new PublicKey("543","23423"),new PrivateKey("45654","345423","23454325"));
-    }
+    }*/
 
-    // Encrypt message
+/*    // Encrypt message
     public static String encrypt(String text, PublicKey foreignPublicKey) {
         // TODO: 02/06/2020
 
@@ -73,7 +73,7 @@ public class Rsa {
         // TODO: 02/06/2020
 
         return text.substring(0, text.length() - 2);
-    }
+    }*/
     /*// Encrypt message
     public byte[] encrypt(byte[] message) {
         return (new BigInteger(message)).modPow(e, N).toByteArray();
@@ -85,7 +85,7 @@ public class Rsa {
     }*/
 
 
-    public static String signature(String textMessage, PrivateKey privateKey) {
+/*    public static String signature(String textMessage, PrivateKey privateKey) {
         // TODO: 02/06/2020
 
         return KeyGenerator.generateKey(6);
@@ -95,5 +95,5 @@ public class Rsa {
         // TODO: 02/06/2020
 
         return true;
-    }
+    }*/
 }
