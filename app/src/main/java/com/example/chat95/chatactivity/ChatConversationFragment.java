@@ -80,7 +80,7 @@ public class ChatConversationFragment extends Fragment {
     private static String symmetricKey;
     private static PrivateKey privateKey;
     private static PublicKey foreignPublicKey;
-
+    private Des des;
 
     public ChatConversationFragment() {
         // Required empty public constructor
@@ -99,7 +99,7 @@ public class ChatConversationFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-
+        des=new Des();
         //handle navigation components
         navController = Navigation.findNavController(view);
         AppBarConfiguration appBarConfiguration =
@@ -487,7 +487,7 @@ public class ChatConversationFragment extends Fragment {
     private void addMessage(String textMessage, String conversationId) {
 
         // TODO: 02/06/2020 crypto, check if correct
-        String cipherText = Des.encrypt(textMessage, symmetricKey);
+        String cipherText = des.encrypt(textMessage, symmetricKey);
         String signature = Rsa.signature(textMessage, privateKey);
 
 
@@ -593,7 +593,7 @@ public class ChatConversationFragment extends Fragment {
 
             @Override
             protected void onBindViewHolder(@NonNull ChatMessageViewHolder holder, int position, @NonNull final ChatMessage model) {
-                String textMessage = Des.decrypt(model.getTextMessage(), symmetricKey);
+                String textMessage = des.decrypt(model.getTextMessage(), symmetricKey);
                 boolean isVerified = Rsa.verify(textMessage, model.getSignature(), foreignPublicKey);
                 if (isVerified) {
                     holder.messageDate.setText(model.getTimeStamp());

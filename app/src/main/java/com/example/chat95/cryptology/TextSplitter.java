@@ -34,16 +34,14 @@ public class TextSplitter {
      * @param n
      * @return
      */
-    public static String fixText(String s,int lengh,int n){
+    public static String fixText(String s,int lengh,int n){ // in hex
         int i;
         String result=s;
-        if(lengh%n !=0){
-            for(i=0; i<(n-(lengh%n));i++){
-
-                result=result+" ";
-            }
+        while(lengh%n !=0){
+                result=result+"20";
+                lengh+=2;
         }
-        Log.d(TAG, "after fix Text: "+result);
+        Log.d(TAG, "after fix Text: "+result+" length: "+result.length());
         return result;
     }
 
