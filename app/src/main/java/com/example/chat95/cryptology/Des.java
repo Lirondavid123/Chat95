@@ -230,7 +230,7 @@ public class Des {
         return right + left;
     }
 
-    public String encryptOnce(String plainText, String key)
+    private String encryptOnce(String plainText, String key)
     {
         int i;
         // get round keys
@@ -261,7 +261,7 @@ public class Des {
         return plainText;
     }
 
-    public String decryptOnce(String plainText, String key)
+    private String decryptOnce(String plainText, String key)
     {
         int i;
         // get round keys
@@ -290,13 +290,13 @@ public class Des {
         return plainText;
     }
 
-    public String encrypt(String plainText,String key){
+    private String encryptRegularDes(String plainText,String key){
         // INPUT:  plainText in ascii, key in Hex
         // OUTPUT:  encryptedText in Hex
         String encryptedText="";
         String tempString;
-        String plainTextInHex= convertAsciiToHex(plainText);
-        List<String> splittedPlainTextInHex= TextSplitter.split(plainTextInHex,16); // list of Strings made of 16 hexadecimal digits
+        //String plainTextInHex= convertAsciiToHex(plainText);
+        List<String> splittedPlainTextInHex= TextSplitter.split(plainText,16); // list of Strings made of 16 hexadecimal digits
         while(!splittedPlainTextInHex.isEmpty()){
             tempString=splittedPlainTextInHex.get(0);
             Log.d(TAG, "encrypt: encrypting(in Ascii): "+convertHexToAscii(tempString)+ " length: "+convertHexToAscii(tempString).length());
@@ -308,25 +308,8 @@ public class Des {
         return encryptedText; // in hex
     }
 
-/*
-    public static String encrypt(String plainText,String key){
-            Log.d(TAG, "Des: encrypt: PlainText: "+plainText);
-            Des des=new Des();
-            String encrypedText="";
-            List<String> splittedPlainText= TextSplitter.split(plainText,16);
-            while(!splittedPlainText.isEmpty()){
-                encrypedText=encrypedText.concat(des.encryptOnce(splittedPlainText.get(0),key));
-                splittedPlainText.remove(0);
-            }
-            Log.d(TAG, "Des: encrypt: encrypted Text: "+encrypedText);
-            return encrypedText;
-        }*/
-    public static String encryptTest(String textMessage, String symmetricKey) {
-        // TODO: 02/06/2020
-        return textMessage + "$$";
-    }
 
-    public String decrypt(String cipherText,String key){
+    private String decryptRegularDes(String cipherText,String key){
         // INPUT:  cipherText in Hex, key in Hex
         // OUTPUT:  plainText in ASCII
         String plainText="";
@@ -337,7 +320,7 @@ public class Des {
             plainText += decryptOnce(splittedCipherText.get(0), key);
             splittedCipherText.remove(0);
         }
-        plainText= convertHexToAscii(plainText);
+        //plainText= convertHexToAscii(plainText);
         Log.d(TAG, "Des: decrypt: PlainText: "+plainText);
         return plainText;
     }
@@ -368,11 +351,27 @@ public class Des {
         return output.toString();
     }
 
-    public static String decryptTest(String textMessage, String symmetricKey) {
-        // TODO: 02/06/2020
-        Log.d(TAG, "decrypt: " + textMessage.substring(0, textMessage.length() - 2));
-        return textMessage.substring(0, textMessage.length() - 2);
+    public String encrypt(String plainText,String key1, String key2){
+        // INPUT:  plainText in ascii, key 1,2 in Hex
+        // OUTPUT:  encryptedText in Hex
+        String plainTextInHex= convertAsciiToHex(plainText);
+
+        String step1 = encryptRegularDes(plainTextInHex,key1);
+        String step2 = decryptRegularDes(step1,key2);
+        String step3 = encryptRegularDes(step2,key1);
+
+        return step3;
     }
-}
+    public String decrypt(String cipherText,String key1,String key2){
+        // INPUT:  cipherText in Hex, key 1,2 in Hex
+        // OUTPUT:  plainText in ASCII
+        String step1 = decryptRegularDes(cipherText,key1);
+        String step2 = encryptRegularDes(step1,key2);
+        String step3 = decryptRegularDes(step2,key1);
+
+        return convertHexToAscii(step3);
+    }
+
+    }
 
 

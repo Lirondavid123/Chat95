@@ -87,15 +87,16 @@ public class ChatActivity extends AppCompatActivity {
         String decrypted;
         Des des=new Des();
         String resultText;
-/*        String text = " naor ohana   or magogi  ... 10 ";
+/*        String text = " tripleDes:  OrMagogi ";
         //String text= des.convertAsciiToHex("OrMag  B");
-        String key = "AABB09182736CCDD";
-        resultText=des.encrypt(text,key);
-        Log.d(TAG, "onStart: encrypt: encryptedText (in hex): "+resultText);
+        String key1 = "AABB09182736CCDD";
+        String key2 = "BBAC25672736ABE3";
+        resultText=des.encrypt(text,key1,key2);
+        Log.d(TAG, "onStart: encrypt: (triple)encryptedText (in hex): "+resultText);
 
 
-        decrypted=des.decrypt(resultText,key);
-        Log.d(TAG, "onStart: decryptedText: "+decrypted);*/
+        decrypted=des.decrypt(resultText,key1,key2);
+        Log.d(TAG, "onStart: (triple)decryptedText: "+decrypted);*/
 
         if (fireBaseAuth.getCurrentUser()== null) {    // if the user is not logged in
             sendUserToLogin();
