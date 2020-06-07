@@ -84,6 +84,7 @@ public class ChatActivity extends AppCompatActivity {
         super.onStart();
         //Log.d(TAG, "onStart: toHextString Test:  "+Long.toHexString());
         LocalDataBase.setMyDAO(AppDatabase.getAppDatabase(getApplicationContext()).ConversationDAO());
+/*
         String decrypted;
         String resultText;
         String text = "Encryption and Decryption with Triple Des, CBC mode, symetricKey!";
@@ -96,6 +97,7 @@ public class ChatActivity extends AppCompatActivity {
         Log.d(TAG, "onStart: encrypt: encryptedText (in hex): "+resultText);
         decrypted=Des.decrypt(resultText,key1+key2+iv);
         Log.d(TAG, "onStart: (triple)decryptedText: "+decrypted);
+*/
 
         if (fireBaseAuth.getCurrentUser()== null) {    // if the user is not logged in
             sendUserToLogin();
