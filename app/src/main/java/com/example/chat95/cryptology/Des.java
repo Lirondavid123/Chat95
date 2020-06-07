@@ -263,11 +263,15 @@ public class Des {
 
         // final permutation
         plainText = permutation(IP1, plainText);
+        // change IV for the next round
+        IV= plainText;
         return plainText;
     }
 
     private String decryptOnce(String plainText, String key)
     {
+        //save plainText before it is decrypted for changing IV at the end of the function
+        String savedPlainTextForIv = plainText;
         int i;
         // get round keys
         String keys[] = getKeys(key);
@@ -292,10 +296,14 @@ public class Des {
         plainText = plainText.substring(8, 16)
                 + plainText.substring(0, 8);
         plainText = permutation(IP1, plainText);
+        // xor plainText and IV
+        //plainText= xor(plainText,IV);
+        // change IV for the next round
+        IV=savedPlainTextForIv;
         return plainText;
     }
 
-    private String encryptRegularDes(String plainText,String key){
+    public String encryptRegularDes(String plainText,String key){
         // INPUT:  plainText in Hex, key in Hex
         // OUTPUT:  encryptedText in Hex
         String encryptedText="";
@@ -314,7 +322,7 @@ public class Des {
     }
 
 
-    private String decryptRegularDes(String cipherText,String key){
+    public String decryptRegularDes(String cipherText,String key){
         // INPUT:  cipherText in Hex, key in Hex
         // OUTPUT:  plainText in Hex
         String plainText="";
@@ -359,11 +367,12 @@ public class Des {
     public String encrypt(String plainText,String key1, String key2, String iv){
         // INPUT:  plainText in ascii, key 1,2 in Hex
         // OUTPUT:  encryptedText in Hex
-        IV=iv;    // first IV initialization
         String plainTextInHex= convertAsciiToHex(plainText);
-
+        IV=iv;    // first IV initialization
         String step1 = encryptRegularDes(plainTextInHex,key1);
+        IV=iv;    // first IV initialization
         String step2 = decryptRegularDes(step1,key2);
+        IV=iv;    // first IV initialization
         String step3 = encryptRegularDes(step2,key1);
 
         return step3;
@@ -373,13 +382,17 @@ public class Des {
         // OUTPUT:  plainText in ASCII
         IV=iv;    // first IV initialization
         String step1 = decryptRegularDes(cipherText,key1);
+        IV=iv;    // first IV initialization
         String step2 = encryptRegularDes(step1,key2);
+        IV=iv;    // first IV initialization
         String step3 = decryptRegularDes(step2,key1);
 
         return convertHexToAscii(step3);
     }
 
-
+    public static void setIV(String IV) {
+        Des.IV = IV;
+    }
 }
 
 

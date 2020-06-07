@@ -487,7 +487,7 @@ public class ChatConversationFragment extends Fragment {
     private void addMessage(String textMessage, String conversationId) {
 
         // TODO: 02/06/2020 crypto, check if correct
-        String cipherText = des.encrypt(textMessage, symmetricKey);
+        String cipherText = des.encrypt(textMessage, symmetricKey,"","");
         String signature = Rsa.signature(textMessage, privateKey);
 
 
@@ -593,7 +593,7 @@ public class ChatConversationFragment extends Fragment {
 
             @Override
             protected void onBindViewHolder(@NonNull ChatMessageViewHolder holder, int position, @NonNull final ChatMessage model) {
-                String textMessage = des.decrypt(model.getTextMessage(), symmetricKey);
+                String textMessage = des.decrypt(model.getTextMessage(), symmetricKey,"","");
                 boolean isVerified = Rsa.verify(textMessage, model.getSignature(), foreignPublicKey);
                 if (isVerified) {
                     holder.messageDate.setText(model.getTimeStamp());
