@@ -7,6 +7,9 @@ import java.util.List;
 import static androidx.constraintlayout.widget.Constraints.TAG;
 
 public class Des {
+    private static String IV;
+
+
     // Initial Permutation Table
     int[] IP = { 58, 50, 42, 34, 26, 18,
             10, 2, 60, 52, 44, 36, 28, 20,
@@ -232,6 +235,8 @@ public class Des {
 
     private String encryptOnce(String plainText, String key)
     {
+        // xor with IV and plainText
+        //plainText= xor(plainText,IV);
         int i;
         // get round keys
         String keys[] = getKeys(key);
@@ -291,7 +296,7 @@ public class Des {
     }
 
     private String encryptRegularDes(String plainText,String key){
-        // INPUT:  plainText in ascii, key in Hex
+        // INPUT:  plainText in Hex, key in Hex
         // OUTPUT:  encryptedText in Hex
         String encryptedText="";
         String tempString;
@@ -311,7 +316,7 @@ public class Des {
 
     private String decryptRegularDes(String cipherText,String key){
         // INPUT:  cipherText in Hex, key in Hex
-        // OUTPUT:  plainText in ASCII
+        // OUTPUT:  plainText in Hex
         String plainText="";
         Des des=new Des();
         Log.d(TAG, "Des: decrypt: CipherText: "+cipherText);
@@ -351,9 +356,10 @@ public class Des {
         return output.toString();
     }
 
-    public String encrypt(String plainText,String key1, String key2){
+    public String encrypt(String plainText,String key1, String key2, String iv){
         // INPUT:  plainText in ascii, key 1,2 in Hex
         // OUTPUT:  encryptedText in Hex
+        IV=iv;    // first IV initialization
         String plainTextInHex= convertAsciiToHex(plainText);
 
         String step1 = encryptRegularDes(plainTextInHex,key1);
@@ -362,9 +368,10 @@ public class Des {
 
         return step3;
     }
-    public String decrypt(String cipherText,String key1,String key2){
+    public String decrypt(String cipherText,String key1,String key2, String iv){
         // INPUT:  cipherText in Hex, key 1,2 in Hex
         // OUTPUT:  plainText in ASCII
+        IV=iv;    // first IV initialization
         String step1 = decryptRegularDes(cipherText,key1);
         String step2 = encryptRegularDes(step1,key2);
         String step3 = decryptRegularDes(step2,key1);
@@ -372,6 +379,7 @@ public class Des {
         return convertHexToAscii(step3);
     }
 
-    }
+
+}
 
 
