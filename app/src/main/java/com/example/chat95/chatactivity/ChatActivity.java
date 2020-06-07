@@ -83,21 +83,22 @@ public class ChatActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
         //Log.d(TAG, "onStart: toHextString Test:  "+Long.toHexString());
-
         LocalDataBase.setMyDAO(AppDatabase.getAppDatabase(getApplicationContext()).ConversationDAO());
-
-
-/*        Des des=new Des();
+/*
+        String decrypted;
         String resultText;
-//        String myKey= KeyGenerator.generateKey(16);
-        String text = "123456ABCD132536";
-        String key = "AABB09182736CCDD";
-        resultText=des.encryptOnce(text,key);
-        Log.d(TAG, "onStart: encryptOne: "+resultText);
-        //resultText= Des.encrypt("Hi my name is or",myKey);
-        Log.d(TAG, "inside on Start");
-        String decrypted=des.decrypt(resultText,key);
-        Log.d(TAG, "onStart: decrypted: "+decrypted);*/
+        String text = "Encryption and Decryption with Triple Des, CBC mode, symetricKey!";
+        Log.d(TAG, "onStart: before encryption(in ascii): "+text);
+        String iv = "DFBA9910543698DC";
+        String key1 = "AABB09182736CCDD";
+        String key2 = "BBAC25672736ABE3";
+        //resultText=des.encrypt(text,key1,key2,iv);
+        resultText=Des.encrypt(text,key1+key2+iv);
+        Log.d(TAG, "onStart: encrypt: encryptedText (in hex): "+resultText);
+        decrypted=Des.decrypt(resultText,key1+key2+iv);
+        Log.d(TAG, "onStart: (triple)decryptedText: "+decrypted);
+*/
+
         if (fireBaseAuth.getCurrentUser()== null) {    // if the user is not logged in
             sendUserToLogin();
         }

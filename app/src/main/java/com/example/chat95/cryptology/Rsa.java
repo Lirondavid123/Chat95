@@ -1,13 +1,16 @@
 package com.example.chat95.cryptology;
 
+
 import com.example.chat95.data.Keys;
 import com.example.chat95.data.PrivateKey;
 import com.example.chat95.data.PublicKey;
-
+import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
+import java.nio.charset.Charset;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Random;
+
 
 public class Rsa {
 
@@ -71,7 +74,7 @@ public class Rsa {
             e.add(BigInteger.ONE);
         }
         BigInteger d = e.modInverse(phi);
-        return new Keys(new PublicKey(e.toString(16),N.toString(16)),new PrivateKey(p.toString(16),q.toString(16),d.toString(16)));
+        return new Keys(new PublicKey(e.toString(),N.toString()),new PrivateKey(p.toString(),q.toString(),d.toString()));
     }
 
     // Encrypt message using public key
@@ -79,8 +82,14 @@ public class Rsa {
         // TODO: 02/06/2020
         BigInteger e = new BigInteger(foreignPublicKey.getE());
         BigInteger n = new BigInteger(foreignPublicKey.getN());
-        return (new BigInteger(text)).modPow(e, n).toString(16);
-       // return text + "$$";
+
+        String str = null;
+        try {
+            str = new String((new BigInteger(text.getBytes("ISO-8859-1"))).modPow(e, n).toByteArray(),"ISO-8859-1");
+        } catch (UnsupportedEncodingException er) {
+            er.printStackTrace();
+        }
+        return str;
     }
 
     // Encrypt message using private key
@@ -88,7 +97,14 @@ public class Rsa {
         // TODO: 02/06/2020
         BigInteger d = new BigInteger(privateKey.getD());
         BigInteger n = new BigInteger(privateKey.getN());
-        return (new BigInteger(text)).modPow(d.modInverse(n), n).toString(16);
+        String str = null;
+        try {
+            str = new String((new BigInteger(text.getBytes("ISO-8859-1"))).modPow(d.modInverse(n), n).toByteArray(),"ISO-8859-1");
+        } catch (UnsupportedEncodingException er) {
+            er.printStackTrace();
+        }
+        return str;
+
         // return text + "$$";
     }
 
@@ -97,16 +113,29 @@ public class Rsa {
         // TODO: 02/06/2020
         BigInteger d = new BigInteger(privateKey.getD());
         BigInteger n = new BigInteger(privateKey.getN());
-        return (new BigInteger(text)).modPow(d, n).toString(16);
-        // return text.substring(0, text.length() - 2);
+
+        String str = null;
+        try {
+            str = new String((new BigInteger(text.getBytes("ISO-8859-1"))).modPow(d, n).toByteArray(),"ISO-8859-1");
+        } catch (UnsupportedEncodingException er) {
+            er.printStackTrace();
+        }
+        return str;
     }
+
 
     // Decrypt message using public key
     public static String decrypt(String text, PublicKey foreignPublicKey) {
         // TODO: 02/06/2020
         BigInteger e = new BigInteger(foreignPublicKey.getE());
         BigInteger n = new BigInteger(foreignPublicKey.getN());
-        return (new BigInteger(text)).modPow(e.modInverse(n), n).toString(16);
+        String str = null;
+        try {
+            str = new String((new BigInteger(text.getBytes("ISO-8859-1"))).modPow(e.modInverse(n), n).toByteArray(),"ISO-8859-1");
+        } catch (UnsupportedEncodingException er) {
+            er.printStackTrace();
+        }
+        return str;
         // return text.substring(0, text.length() - 2);
     }
     /*// Encrypt message
@@ -133,7 +162,7 @@ public class Rsa {
             BigInteger inputDigestBigInt = new BigInteger(1, inputDigest);
 
             // Convert the input digest into hex value
-            String hashtext = inputDigestBigInt.toString(16);
+            String hashtext = inputDigestBigInt.toString();
 
             //Add preceding 0's to pad the hashtext to make it 32 bit
             while (hashtext.length() < 32) {
