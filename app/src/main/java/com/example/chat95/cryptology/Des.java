@@ -11,7 +11,7 @@ public class Des {
 
 
     // Initial Permutation Table
-    int[] IP = { 58, 50, 42, 34, 26, 18,
+    private static int[] IP = { 58, 50, 42, 34, 26, 18,
             10, 2, 60, 52, 44, 36, 28, 20,
             12, 4, 62, 54, 46, 38,
             30, 22, 14, 6, 64, 56,
@@ -23,7 +23,7 @@ public class Des {
             47, 39, 31, 23, 15, 7 };
 
     // Inverse Initial Permutation Table
-    int[] IP1 = { 40, 8, 48, 16, 56, 24, 64,
+    private static int[] IP1 = { 40, 8, 48, 16, 56, 24, 64,
             32, 39, 7, 47, 15, 55,
             23, 63, 31, 38, 6, 46,
             14, 54, 22, 62, 30, 37,
@@ -36,7 +36,7 @@ public class Des {
             17, 57, 25 };
 
     // first key-hePermutation Table
-    int[] PC1 = { 57, 49, 41, 33, 25,
+    private static int[] PC1 = { 57, 49, 41, 33, 25,
             17, 9, 1, 58, 50, 42, 34, 26,
             18, 10, 2, 59, 51, 43, 35, 27,
             19, 11, 3, 60, 52, 44, 36, 63,
@@ -46,7 +46,7 @@ public class Des {
             20, 12, 4 };
 
     // second key-Permutation Table
-    int[] PC2 = { 14, 17, 11, 24, 1, 5, 3,
+    private static int[] PC2 = { 14, 17, 11, 24, 1, 5, 3,
             28, 15, 6, 21, 10, 23, 19, 12,
             4, 26, 8, 16, 7, 27, 20, 13, 2,
             41, 52, 31, 37, 47, 55, 30, 40,
@@ -54,7 +54,7 @@ public class Des {
             34, 53, 46, 42, 50, 36, 29, 32 };
 
     // Expansion D-box Table
-    int[] EP = { 32, 1, 2, 3, 4, 5, 4,
+    private static int[] EP = { 32, 1, 2, 3, 4, 5, 4,
             5, 6, 7, 8, 9, 8, 9, 10,
             11, 12, 13, 12, 13, 14, 15,
             16, 17, 16, 17, 18, 19, 20,
@@ -63,14 +63,14 @@ public class Des {
             29, 30, 31, 32, 1 };
 
     // Straight Permutation Table
-    int[] P = { 16, 7, 20, 21, 29, 12, 28,
+    private static int[] P = { 16, 7, 20, 21, 29, 12, 28,
             17, 1, 15, 23, 26, 5, 18,
             31, 10, 2, 8, 24, 14, 32,
             27, 3, 9, 19, 13, 30, 6,
             22, 11, 4, 25 };
 
     // S-box Table
-    int[][][] sbox = {
+    private static int[][][] sbox = {
             { { 14, 4, 13, 1, 2, 15, 11, 8, 3, 10, 6, 12, 5, 9, 0, 7 },
                     { 0, 15, 7, 4, 14, 2, 13, 1, 10, 6, 12, 11, 9, 5, 3, 8 },
                     { 4, 1, 14, 8, 13, 6, 2, 11, 15, 12, 9, 7, 3, 10, 5, 0 },
@@ -105,11 +105,11 @@ public class Des {
                     { 7, 11, 4, 1, 9, 12, 14, 2, 0, 6, 10, 13, 15, 3, 5, 8 },
                     { 2, 1, 14, 7, 4, 10, 8, 13, 15, 12, 9, 0, 3, 5, 6, 11 } }
     };
-    int[] shiftBits = { 1, 1, 2, 2, 2, 2, 2, 2,
+    private static int[] shiftBits = { 1, 1, 2, 2, 2, 2, 2, 2,
             1, 2, 2, 2, 2, 2, 2, 1 };
 
     // hexadecimal to binary conversion
-    String hextoBin(String input)
+    private static String hextoBin(String input)
     {
         int n = input.length() * 4;
         input = Long.toBinaryString(
@@ -120,7 +120,7 @@ public class Des {
     }
 
     // binary to hexadecimal conversion
-    String binToHex(String input)
+    private static String binToHex(String input)
     {
         int n = (int)input.length() / 4;
         input = Long.toHexString(
@@ -132,7 +132,7 @@ public class Des {
 
     // per-mutate input hexadecimal
     // according to specified sequence
-    String permutation(int[] sequence, String input)
+    private static String permutation(int[] sequence, String input)
     {
         String output = "";
         input = hextoBin(input);
@@ -143,7 +143,7 @@ public class Des {
     }
 
     // xor 2 hexadecimal strings
-    String xor(String a, String b)
+    private static String xor(String a, String b)
     {
         // hexadecimal to decimal(base 10)
         long t_a = Long.parseUnsignedLong(a, 16);
@@ -160,7 +160,7 @@ public class Des {
     }
 
     // left Circular Shifting bits
-    String leftCircularShift(String input, int numBits)
+    private static String leftCircularShift(String input, int numBits)
     {
         int n = input.length() * 4;
         int perm[] = new int[n];
@@ -173,7 +173,7 @@ public class Des {
     }
 
     // preparing 16 keys for 16 rounds
-    String[] getKeys(String key)
+    private static String[] getKeys(String key)
     {
         String keys[] = new String[16];
         // first key permutation
@@ -190,7 +190,7 @@ public class Des {
     }
 
     // s-box lookup
-    String sBox(String input)
+    private static String sBox(String input)
     {
         String output = "";
         input = hextoBin(input);
@@ -207,7 +207,7 @@ public class Des {
         return output;
     }
 
-    String round(String input, String key, int num)
+    private static String round(String input, String key, int num)
     {
         // fk
         String left = input.substring(0, 8);
@@ -233,10 +233,10 @@ public class Des {
         return right + left;
     }
 
-    private String encryptOnce(String plainText, String key)
+    private static String encryptOnce(String plainText, String key)
     {
         // xor with IV and plainText
-        //plainText= xor(plainText,IV);
+        plainText= xor(plainText,IV);
         int i;
         // get round keys
         String keys[] = getKeys(key);
@@ -268,7 +268,7 @@ public class Des {
         return plainText;
     }
 
-    private String decryptOnce(String plainText, String key)
+    private static String decryptOnce(String plainText, String key)
     {
         //save plainText before it is decrypted for changing IV at the end of the function
         String savedPlainTextForIv = plainText;
@@ -297,13 +297,13 @@ public class Des {
                 + plainText.substring(0, 8);
         plainText = permutation(IP1, plainText);
         // xor plainText and IV
-        //plainText= xor(plainText,IV);
+        plainText= xor(plainText,IV);
         // change IV for the next round
         IV=savedPlainTextForIv;
         return plainText;
     }
 
-    public String encryptRegularDes(String plainText,String key){
+    private static String encryptRegularDes(String plainText,String key){
         // INPUT:  plainText in Hex, key in Hex
         // OUTPUT:  encryptedText in Hex
         String encryptedText="";
@@ -322,7 +322,7 @@ public class Des {
     }
 
 
-    public String decryptRegularDes(String cipherText,String key){
+    private static String decryptRegularDes(String cipherText,String key){
         // INPUT:  cipherText in Hex, key in Hex
         // OUTPUT:  plainText in Hex
         String plainText="";
@@ -339,7 +339,7 @@ public class Des {
     }
 
 
-    public String convertAsciiToHex(String s){
+    public static String convertAsciiToHex(String s){
 
         char[] ch = s.toCharArray();
 
@@ -353,7 +353,7 @@ public class Des {
         }
         return builder.toString();
     }
-    public String convertHexToAscii(String hexStr) {
+    public static  String convertHexToAscii(String hexStr) {
         StringBuilder output = new StringBuilder("");
 
         for (int i = 0; i < hexStr.length(); i += 2) {
@@ -364,9 +364,12 @@ public class Des {
         return output.toString();
     }
 
-    public String encrypt(String plainText,String key1, String key2, String iv){
+    public static String encrypt(String plainText,String symetricKey){
         // INPUT:  plainText in ascii, key 1,2 in Hex
         // OUTPUT:  encryptedText in Hex
+        String key1=symetricKey.substring(0,16);
+        String key2=symetricKey.substring(16,32);
+        String iv=symetricKey.substring(32,48);
         String plainTextInHex= convertAsciiToHex(plainText);
         IV=iv;    // first IV initialization
         String step1 = encryptRegularDes(plainTextInHex,key1);
@@ -377,9 +380,12 @@ public class Des {
 
         return step3;
     }
-    public String decrypt(String cipherText,String key1,String key2, String iv){
+    public static String decrypt(String cipherText,String symetricKey){
         // INPUT:  cipherText in Hex, key 1,2 in Hex
         // OUTPUT:  plainText in ASCII
+        String key1=symetricKey.substring(0,16);
+        String key2=symetricKey.substring(16,32);
+        String iv=symetricKey.substring(32,48);
         IV=iv;    // first IV initialization
         String step1 = decryptRegularDes(cipherText,key1);
         IV=iv;    // first IV initialization
