@@ -28,19 +28,20 @@ public class TextSplitter {
     }
 
     /**
-     * add zeroes "0" in the end to fix the lengh of the original string
+     * add spaces " " in the end to fix the lengh of the original string
      * @param s
      * @param lengh
      * @param n
      * @return
      */
-    public static String fixText(String s,int lengh,int n){
+    public static String fixText(String s,int lengh,int n){ // in hex
         int i;
         String result=s;
-        for(i=0; i<(n-(lengh%n));i++){
-            result=result.concat("0");
+        while(lengh%n !=0){
+                result=result+"20";
+                lengh+=2;
         }
-        Log.d(TAG, "after fix Text: "+result);
+        Log.d(TAG, "after fix Text: "+result+" length: "+result.length());
         return result;
     }
 

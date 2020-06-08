@@ -85,7 +85,6 @@ public class ChatConversationFragment extends Fragment {
     private ValueEventListener approvedListener;
     private ValueEventListener messagesListener;
 
-
     public ChatConversationFragment() {
         // Required empty public constructor
     }
@@ -103,7 +102,6 @@ public class ChatConversationFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-
         //handle navigation components
         navController = Navigation.findNavController(view);
         AppBarConfiguration appBarConfiguration =
@@ -159,6 +157,7 @@ public class ChatConversationFragment extends Fragment {
         isConversationPartiallyApproved = chosenChatConversation.getApproved();
         if (isConversationPartiallyApproved) {
             Log.d(TAG, "getConversationDetails: conversation was partially approved");
+            prepareDatabaseQuery();
             ConversationEntity conversationEntity = LocalDataBase.retrieveConversationData(conversationId);
             isConversationTotallyApproved = conversationEntity.isApproved();
             if (!isConversationTotallyApproved) {
@@ -170,7 +169,7 @@ public class ChatConversationFragment extends Fragment {
                         , new PublicKey(conversationEntity.getForeignE(), conversationEntity.getForeignN()),
                         new PrivateKey(conversationEntity.getP(), conversationEntity.getQ(), conversationEntity.getD()));
             }
-            prepareDatabaseQuery();
+
         } else {
             Log.d(TAG, "getConversationDetails: conversation is not approved");
             setConversationApproval(isConversationPartiallyApproved, chosenChatConversation.getSender());
@@ -307,7 +306,6 @@ public class ChatConversationFragment extends Fragment {
     }
 
     private void setStartConversationButton() {
-//        binding.chatConversationRecyclerview.setVisibility(View.INVISIBLE);
         binding.chatUserInput.setVisibility(View.GONE);
         binding.startConversationBtn.setVisibility(View.VISIBLE);
     }
@@ -405,7 +403,7 @@ public class ChatConversationFragment extends Fragment {
                 binding.approveBtn.setEnabled(false);
                 // TODO: 01/06/2020 crypto- replace temporary methods with real ones
                 foreignPublicKey = chosenChatConversation.getPublicKey();
-                symmetricKey = KeyGenerator.generateKey(24);
+                symmetricKey = KeyGenerator.generateKey(48);
                 String KIC = Rsa.encrypt(symmetricKey, foreignPublicKey);
 
                 Keys keys = Rsa.createKeys();
@@ -464,52 +462,6 @@ public class ChatConversationFragment extends Fragment {
         });
     }
 
-/*    private Task<String> startNewChatConversation() {
-
-        // Create the arguments to the callable function.
-        Map<String, Object> data = new HashMap<>();
-        data.put("senderId", ChatActivity.getFireBaseAuth().getUid());
-        data.put("senderName", ChatActivity.getLoggedUser().getUserFullName());
-        data.put("receiverName", userName);
-        data.put("receiverId", chosenUid);
-
-        return mFunctions
-                .getHttpsCallable("approveChatConversation")
-                .call(data)
-                .continueWith(new Continuation<HttpsCallableResult, String>() {
-                    @Override
-                    public String then(@NonNull Task<HttpsCallableResult> task) throws Exception {
-                        // This continuation runs on either success or failure, but if the task
-                        // has failed then getResult() will throw an Exception which will be
-                        // propagated down.
-                        String result = (String) task.getResult().getData();
-                        return result;
-                    }
-                });
-    }
-
-    private Task<String> approveChatConversation() {
-
-        // Create the arguments to the callable function.
-        Map<String, Object> data = new HashMap<>();
-        data.put("sender", chosenUid);
-        data.put("senderName", userName);
-        data.put("receiverName", ChatActivity.getLoggedUser().getUserFullName());
-
-        return mFunctions
-                .getHttpsCallable("approveChatConversation")
-                .call(data)
-                .continueWith(new Continuation<HttpsCallableResult, String>() {
-                    @Override
-                    public String then(@NonNull Task<HttpsCallableResult> task) throws Exception {
-                        // This continuation runs on either success or failure, but if the task
-                        // has failed then getResult() will throw an Exception which will be
-                        // propagated down.
-                        String result = (String) task.getResult().getData();
-                        return result;
-                    }
-                });
-    }*/
 
     private void sendMessage() {
         final String textMessage = binding.chatUserInput.getText().toString();
@@ -537,10 +489,7 @@ public class ChatConversationFragment extends Fragment {
                 chosenUid,
                 DateUtils.getCurrentTimeString(), signature);
         //
-/*        ChatMessage chatMessage = new ChatMessage(textMessage,
-                ChatActivity.getFireBaseAuth().getUid(),
-                chosenUid,
-                DateUtils.getCurrentTimeString());*/
+
 //                    firebaseRecyclerAdapter.getSnapshots().
 
         DatabaseReference messageRef = dbRef.child(ConstantValues.CHAT_MESSAGES).child(conversationId).push();
@@ -610,27 +559,6 @@ public class ChatConversationFragment extends Fragment {
 
         chatMessagesRef = FirebaseDatabase.getInstance().getReference()
                 .child(ConstantValues.CHAT_MESSAGES).child(conversationId);
-
-//        messagesListener=chatMessagesRef.addValueEventListener(new ValueEventListener() {
-        chatMessagesRef.addListenerForSingleValueEvent(new ValueEventListener() {
-
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                if (!dataSnapshot.hasChildren()) {
-                    Toast.makeText(getContext(), "No messages to display.", Toast.LENGTH_LONG).show();
-                } else {
-                    displayMessagesList(binding.chatConversationRecyclerview, chatMessagesRef);
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        });
-    }
-
-    public void displayMessagesList(final RecyclerView chatMessagesRecyclerView, Query chatMessagesRef) {
         if (approvedListener != null) {
             dbRef.removeEventListener(approvedListener);
         }
@@ -670,14 +598,35 @@ public class ChatConversationFragment extends Fragment {
                 } else {
                     weAreAngry();
                 }
+            }
+        };
+        checkForMessages();
 
+    }
+
+    private void checkForMessages() {
+        chatMessagesRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (!dataSnapshot.hasChildren()) {
+                    Toast.makeText(getContext(), "No messages to display.", Toast.LENGTH_LONG).show();
+                } else {
+                    displayMessagesList();
+                }
             }
 
-        };
-        chatMessagesRecyclerView.setAdapter(firebaseRecyclerAdapter);
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
 
+            }
+        });
+    }
+
+    public void displayMessagesList() {
+        binding.chatConversationRecyclerview.setAdapter(firebaseRecyclerAdapter);
         firebaseRecyclerAdapter.startListening();
-        chatMessagesRecyclerView.scrollToPosition(firebaseRecyclerAdapter.getItemCount() - 1);
+        if (firebaseRecyclerAdapter.getItemCount() >= 1)
+            binding.chatConversationRecyclerview.scrollToPosition(firebaseRecyclerAdapter.getItemCount() - 1);
     }
 
     @Override
