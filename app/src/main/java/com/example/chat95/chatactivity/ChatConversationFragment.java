@@ -157,6 +157,7 @@ public class ChatConversationFragment extends Fragment {
         isConversationPartiallyApproved = chosenChatConversation.getApproved();
         if (isConversationPartiallyApproved) {
             Log.d(TAG, "getConversationDetails: conversation was partially approved");
+            prepareDatabaseQuery();
             ConversationEntity conversationEntity = LocalDataBase.retrieveConversationData(conversationId);
             isConversationTotallyApproved = conversationEntity.isApproved();
             if (!isConversationTotallyApproved) {
@@ -168,7 +169,7 @@ public class ChatConversationFragment extends Fragment {
                         , new PublicKey(conversationEntity.getForeignE(), conversationEntity.getForeignN()),
                         new PrivateKey(conversationEntity.getP(), conversationEntity.getQ(), conversationEntity.getD()));
             }
-            prepareDatabaseQuery();
+
         } else {
             Log.d(TAG, "getConversationDetails: conversation is not approved");
             setConversationApproval(isConversationPartiallyApproved, chosenChatConversation.getSender());
@@ -239,7 +240,7 @@ public class ChatConversationFragment extends Fragment {
                     if (binding != null) {
                         Log.d(TAG, "onDataChange: prepare database query after user approved");
                         prepareUserInputField();
-                        displayMessagesList();
+                        prepareDatabaseQuery();
                     }
                 }
             }
@@ -305,7 +306,6 @@ public class ChatConversationFragment extends Fragment {
     }
 
     private void setStartConversationButton() {
-//        binding.chatConversationRecyclerview.setVisibility(View.INVISIBLE);
         binding.chatUserInput.setVisibility(View.GONE);
         binding.startConversationBtn.setVisibility(View.VISIBLE);
     }
