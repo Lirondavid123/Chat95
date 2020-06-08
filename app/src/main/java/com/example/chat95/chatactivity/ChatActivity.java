@@ -18,6 +18,11 @@ import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 
 import com.example.chat95.R;
+import com.example.chat95.cryptology.KeyGenerator;
+import com.example.chat95.cryptology.Rsa;
+import com.example.chat95.data.Keys;
+import com.example.chat95.data.PrivateKey;
+import com.example.chat95.data.PublicKey;
 import com.example.chat95.data.User;
 import com.example.chat95.databinding.ActivityChatBinding;
 import com.example.chat95.login.LoginActivity;
@@ -79,8 +84,47 @@ public class ChatActivity extends AppCompatActivity {
         //Log.d(TAG, "onStart: toHextString Test:  "+Long.toHexString());
 
 
+//        Keys keys = Rsa.createKeys();
+//        PrivateKey privateKey = keys.getPrivateKey();
+//        PublicKey publicKey = keys.getPublicKey();
+//        Keys keys2 = Rsa.createKeys();
+//        PrivateKey privateKey2 = keys2.getPrivateKey();
+//        PublicKey publicKey2 = keys2.getPublicKey();
+//        String symmetricKey = KeyGenerator.generateKey(24);
+//        Log.d(TAG, "onStart: symmetricKey: "+symmetricKey);
+//        String KIC = Rsa.encrypt(symmetricKey, publicKey);
+//        Log.d(TAG, "onStart: KIC: "+KIC);
+//        String symmetricKeyB = Rsa.decrypt(KIC, privateKey);
+//        Log.d(TAG, "onStart: symmetricKeyB: "+symmetricKeyB);
+
+//        String hashedMessage = Rsa.getCryptoHash(symmetricKey, "MD5");
+//        Log.d(TAG, "onStart: signature hashedMessage"+hashedMessage);
+//        String encryptedHash = Rsa.encrypt(hashedMessage, privateKey);
+//        Log.d(TAG, "onStart: verify encryptedHash"+encryptedHash);
+//        String expectedHashMessage = Rsa.decrypt(encryptedHash, publicKey);
+//        Log.d(TAG, "onStart: verify expectedHashMessage"+expectedHashMessage);
+
+//        String sign = Rsa.signature(symmetricKey, privateKey);
+//        if(Rsa.verify(symmetricKey, sign, publicKey)){
+//            Log.d(TAG, "onStart: Good");
+//        } else {
+//            Log.d(TAG, "onStart: Bad");
+//        }
 
         LocalDataBase.setMyDAO(AppDatabase.getAppDatabase(getApplicationContext()).ConversationDAO());
+
+
+/*        Des des=new Des();
+        String resultText;
+//        String myKey= KeyGenerator.generateKey(16);
+        String text = "123456ABCD132536";
+        String key = "AABB09182736CCDD";
+        resultText=des.encryptOnce(text,key);
+        Log.d(TAG, "onStart: encryptOne: "+resultText);
+        //resultText= Des.encrypt("Hi my name is or",myKey);
+        Log.d(TAG, "inside on Start");
+        String decrypted=des.decrypt(resultText,key);
+        Log.d(TAG, "onStart: decrypted: "+decrypted);*/
         if (fireBaseAuth.getCurrentUser()== null) {    // if the user is not logged in
             sendUserToLogin();
         }

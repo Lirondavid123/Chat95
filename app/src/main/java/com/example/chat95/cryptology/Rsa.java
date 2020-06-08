@@ -1,6 +1,8 @@
 package com.example.chat95.cryptology;
 
 
+import android.util.Log;
+
 import com.example.chat95.data.Keys;
 import com.example.chat95.data.PrivateKey;
 import com.example.chat95.data.PublicKey;
@@ -10,6 +12,8 @@ import java.nio.charset.Charset;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Random;
+
+import static android.content.ContentValues.TAG;
 
 
 public class Rsa {
@@ -71,7 +75,7 @@ public class Rsa {
         BigInteger phi = p.subtract(BigInteger.ONE).multiply(q.subtract(BigInteger.ONE));
         BigInteger e = BigInteger.probablePrime(bitLength / 2, r);
         while (phi.gcd(e).compareTo(BigInteger.ONE) > 0 && e.compareTo(phi) < 0) {
-            e.add(BigInteger.ONE);
+            e = e.add(BigInteger.ONE);
         }
         BigInteger d = e.modInverse(phi);
         return new Keys(new PublicKey(e.toString(),N.toString()),new PrivateKey(p.toString(),q.toString(),d.toString()));
@@ -99,7 +103,7 @@ public class Rsa {
         BigInteger n = new BigInteger(privateKey.getN());
         String str = null;
         try {
-            str = new String((new BigInteger(text.getBytes("ISO-8859-1"))).modPow(d.modInverse(n), n).toByteArray(),"ISO-8859-1");
+            str = new String((new BigInteger(text.getBytes("ISO-8859-1"))).modPow(d, n).toByteArray(),"ISO-8859-1");
         } catch (UnsupportedEncodingException er) {
             er.printStackTrace();
         }
@@ -131,7 +135,7 @@ public class Rsa {
         BigInteger n = new BigInteger(foreignPublicKey.getN());
         String str = null;
         try {
-            str = new String((new BigInteger(text.getBytes("ISO-8859-1"))).modPow(e.modInverse(n), n).toByteArray(),"ISO-8859-1");
+            str = new String((new BigInteger(text.getBytes("ISO-8859-1"))).modPow(e, n).toByteArray(),"ISO-8859-1");
         } catch (UnsupportedEncodingException er) {
             er.printStackTrace();
         }
@@ -179,6 +183,7 @@ public class Rsa {
     public static String signature(String textMessage, PrivateKey privateKey) {
         // TODO: 02/06/2020
         String hashedMessage = getCryptoHash(textMessage, "MD5");
+       // Log.d(TAG, "onStart: signature hashedMessage"+hashedMessage);
         return encrypt(hashedMessage, privateKey);
        // return KeyGenerator.generateKey(6);
     }
@@ -186,7 +191,9 @@ public class Rsa {
     public static boolean verify(String textMessage, String signature, PublicKey foreignPublicKey) {
         // TODO: 02/06/2020
         String hashedMessage = getCryptoHash(textMessage, "MD5");
+       // Log.d(TAG, "onStart: verify hashedMessage"+hashedMessage);
         String expectedHashMessage = decrypt(signature, foreignPublicKey);
+      //  Log.d(TAG, "onStart: verify expectedHashMessage"+expectedHashMessage);
         return hashedMessage.equals(expectedHashMessage);
     }
 }
