@@ -11,6 +11,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CompoundButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -40,19 +41,15 @@ import com.example.chat95.utils.ConstantValues;
 import com.example.chat95.utils.DateUtils;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
-import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.functions.FirebaseFunctions;
-import com.google.firebase.functions.HttpsCallableResult;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -84,6 +81,7 @@ public class ChatConversationFragment extends Fragment {
     private DatabaseReference chatMessagesRef;
     private ValueEventListener approvedListener;
     private ValueEventListener messagesListener;
+    private boolean areThereAnyMessages;
 
     public ChatConversationFragment() {
         // Required empty public constructor
@@ -414,50 +412,72 @@ public class ChatConversationFragment extends Fragment {
                         , publicKey.getN()
                         , privateKey.getD(), privateKey.getP(), privateKey.getQ(), symmetricKey, foreignPublicKey.getE(), foreignPublicKey.getN(), true));
 
-                HashMap childUpdates = new HashMap();
-                childUpdates.put(String.format("/%s/%s/%s/%s",
-                        ConstantValues.CHAT_CONVERSATIONS
-                        , ChatActivity.getFireBaseAuth().getUid()
-                        , chosenUid, "publicKey")
-                        , publicKey);
-                childUpdates.put(String.format("/%s/%s/%s/%s",
-                        ConstantValues.CHAT_CONVERSATIONS
-                        , ChatActivity.getFireBaseAuth().getUid()
-                        , chosenUid, "kic")
-                        , KIC);
-                childUpdates.put(String.format("/%s/%s/%s/%s",
-                        ConstantValues.CHAT_CONVERSATIONS
-                        , chosenUid
-                        , ChatActivity.getFireBaseAuth().getUid(), "kic")
-                        , KIC);
-                childUpdates.put(String.format("/%s/%s/%s/%s",
-                        ConstantValues.CHAT_CONVERSATIONS
-                        , chosenUid
-                        , ChatActivity.getFireBaseAuth().getUid(), "publicKey")
-                        , publicKey);
-                childUpdates.put(String.format("/%s/%s/%s/%s",
-                        ConstantValues.CHAT_CONVERSATIONS
-                        , ChatActivity.getFireBaseAuth().getUid()
-                        , chosenUid, ConstantValues.APPROVED)
-                        , true);
-                childUpdates.put(String.format("/%s/%s/%s/%s",
-                        ConstantValues.CHAT_CONVERSATIONS
-                        , chosenUid
-                        , ChatActivity.getFireBaseAuth().getUid(), ConstantValues.APPROVED)
-                        , true);
-                dbRef = FirebaseDatabase.getInstance().getReference();
-                dbRef.updateChildren(childUpdates).addOnCompleteListener(new OnCompleteListener() {
-                    @Override
-                    public void onComplete(@NonNull Task task) {
-                        Toast.makeText(getContext(), "Conversation has been approved! say hi to your new pal", Toast.LENGTH_SHORT).show();
-                        if (binding != null) {
-                            binding.approveMessageLayout.setVisibility(View.GONE);
-                            binding.chatUserInput.setVisibility(View.VISIBLE);
-                            binding.chatConversationSendBtn.setVisibility(View.VISIBLE);
-                            prepareDatabaseQuery();
+                updateDB(publicKey, KIC);
+
+            }
+        });
+        binding.decryptSwtich.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (firebaseRecyclerAdapter != null && firebaseRecyclerAdapter.getItemCount() != 0) {
+                    ChatMessageViewHolder viewHolder;
+                    for (int i = 0; i < firebaseRecyclerAdapter.getItemCount(); i++) {
+                        viewHolder = (ChatMessageViewHolder) binding.chatConversationRecyclerview.findViewHolderForAdapterPosition(i);
+                        assert viewHolder != null;
+                        if (isChecked) {
+                            viewHolder.textMessageView.setText(viewHolder.plainText);
+                        } else {
+                            viewHolder.textMessageView.setText(viewHolder.chipherText);
                         }
                     }
-                });
+                }
+            }
+        });
+    }
+
+    private void updateDB(PublicKey publicKey, String KIC) {
+        HashMap childUpdates = new HashMap();
+        childUpdates.put(String.format("/%s/%s/%s/%s",
+                ConstantValues.CHAT_CONVERSATIONS
+                , ChatActivity.getFireBaseAuth().getUid()
+                , chosenUid, "publicKey")
+                , publicKey);
+        childUpdates.put(String.format("/%s/%s/%s/%s",
+                ConstantValues.CHAT_CONVERSATIONS
+                , ChatActivity.getFireBaseAuth().getUid()
+                , chosenUid, "kic")
+                , KIC);
+        childUpdates.put(String.format("/%s/%s/%s/%s",
+                ConstantValues.CHAT_CONVERSATIONS
+                , chosenUid
+                , ChatActivity.getFireBaseAuth().getUid(), "kic")
+                , KIC);
+        childUpdates.put(String.format("/%s/%s/%s/%s",
+                ConstantValues.CHAT_CONVERSATIONS
+                , chosenUid
+                , ChatActivity.getFireBaseAuth().getUid(), "publicKey")
+                , publicKey);
+        childUpdates.put(String.format("/%s/%s/%s/%s",
+                ConstantValues.CHAT_CONVERSATIONS
+                , ChatActivity.getFireBaseAuth().getUid()
+                , chosenUid, ConstantValues.APPROVED)
+                , true);
+        childUpdates.put(String.format("/%s/%s/%s/%s",
+                ConstantValues.CHAT_CONVERSATIONS
+                , chosenUid
+                , ChatActivity.getFireBaseAuth().getUid(), ConstantValues.APPROVED)
+                , true);
+        dbRef = FirebaseDatabase.getInstance().getReference();
+        dbRef.updateChildren(childUpdates).addOnCompleteListener(new OnCompleteListener() {
+            @Override
+            public void onComplete(@NonNull Task task) {
+                Toast.makeText(getContext(), "Conversation has been approved! say hi to your new pal", Toast.LENGTH_SHORT).show();
+                if (binding != null) {
+                    binding.approveMessageLayout.setVisibility(View.GONE);
+                    binding.chatUserInput.setVisibility(View.VISIBLE);
+                    binding.chatConversationSendBtn.setVisibility(View.VISIBLE);
+                    checkForMessages();
+                }
             }
         });
     }
@@ -466,13 +486,17 @@ public class ChatConversationFragment extends Fragment {
     private void sendMessage() {
         final String textMessage = binding.chatUserInput.getText().toString();
         binding.chatUserInput.setText("");
-
+        if (!areThereAnyMessages && firebaseRecyclerAdapter != null) {
+            firebaseRecyclerAdapter.startListening();
+            areThereAnyMessages = true;
+        }
 //        final Map<String, Object> childUpdates = new HashMap<>();
         if (!doesConversationExist) {
             Log.d(TAG, "sendMessage: conversation does not exist");
             createNewConversationInDB();
         } else {
             Log.d(TAG, "sendMessage: conversation exists");
+
             addMessage(textMessage, chosenChatConversation.getConversationId());
         }
     }
@@ -581,27 +605,38 @@ public class ChatConversationFragment extends Fragment {
 
             @Override
             protected void onBindViewHolder(@NonNull ChatMessageViewHolder holder, int position, @NonNull final ChatMessage model) {
-                String textMessage = Des.decrypt(model.getTextMessage(), symmetricKey);
-                boolean isVerified = Rsa.verify(textMessage, model.getSignature(), foreignPublicKey);
+                if (!areThereAnyMessages) {
+                    areThereAnyMessages = true;
+                }
+                String plainText = Des.decrypt(model.getTextMessage(), symmetricKey);
+                holder.plainText = plainText;
+                holder.chipherText = model.getTextMessage();
+                Log.d(TAG, "onBindViewHolder: text message: " + plainText);
+                boolean isVerified = Rsa.verify(plainText, model.getSignature(), foreignPublicKey);
                 if (isVerified) {
+                    if (binding.decryptSwtich.isChecked()) {
+                        holder.textMessageView.setText(plainText);
+                    } else {
+                        holder.textMessageView.setText(model.getTextMessage());
+                    }
                     holder.messageDate.setText(model.getTimeStamp());
-                    holder.textMessage.setText(textMessage);
+
                     Drawable background;
                     if (model.getSenderId().equals(ChatActivity.getFireBaseAuth().getUid())) {
                         background = getResources().getDrawable(R.drawable.message_form_blue);
-                        holder.textMessage.setLayoutDirection(View.LAYOUT_DIRECTION_RTL);
+                        holder.textMessageView.setLayoutDirection(View.LAYOUT_DIRECTION_RTL);
                     } else {
                         background = getResources().getDrawable(R.drawable.message_form_grey);
-                        holder.textMessage.setLayoutDirection(View.LAYOUT_DIRECTION_LTR);
+                        holder.textMessageView.setLayoutDirection(View.LAYOUT_DIRECTION_LTR);
                     }
-                    holder.textMessage.setBackground(background);
+                    holder.textMessageView.setBackground(background);
                 } else {
                     weAreAngry();
                 }
             }
         };
+        binding.chatConversationRecyclerview.setAdapter(firebaseRecyclerAdapter);
         checkForMessages();
-
     }
 
     private void checkForMessages() {
@@ -623,7 +658,6 @@ public class ChatConversationFragment extends Fragment {
     }
 
     public void displayMessagesList() {
-        binding.chatConversationRecyclerview.setAdapter(firebaseRecyclerAdapter);
         firebaseRecyclerAdapter.startListening();
         if (firebaseRecyclerAdapter.getItemCount() >= 1)
             binding.chatConversationRecyclerview.scrollToPosition(firebaseRecyclerAdapter.getItemCount() - 1);
@@ -639,12 +673,21 @@ public class ChatConversationFragment extends Fragment {
     }
 
     public static class ChatMessageViewHolder extends RecyclerView.ViewHolder {
-        TextView messageDate, textMessage;
+        TextView messageDate, textMessageView;
+        private String plainText, chipherText;
 
         public ChatMessageViewHolder(@NonNull final View itemView) {
             super(itemView);
             messageDate = itemView.findViewById(R.id.message_date);
-            textMessage = itemView.findViewById(R.id.textMessage);
+            textMessageView = itemView.findViewById(R.id.textMessage);
+        }
+
+        public String getPlainText() {
+            return plainText;
+        }
+
+        public String getChipherText() {
+            return chipherText;
         }
     }
 

@@ -150,7 +150,9 @@ public class ChatListFragment extends Fragment {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 if (!dataSnapshot.hasChildren()) {
-                    Toast.makeText(getContext(), "No chats to display yet...send some greetings to others!", Toast.LENGTH_LONG).show();
+                    if (binding != null && binding.chatListRecycler != null) {
+                        Toast.makeText(getContext(), "No chats to display yet...send some greetings to others!", Toast.LENGTH_LONG).show();
+                    }
 /*                    if (firebaseRecyclerAdapter != null) {
                         firebaseRecyclerAdapter.stopListening();
                     }*/
