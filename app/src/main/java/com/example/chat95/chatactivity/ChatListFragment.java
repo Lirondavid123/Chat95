@@ -31,6 +31,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 
+import com.example.chat95.cryptology.Des;
 import com.example.chat95.utils.ConstantValues;
 import com.example.chat95.R;
 import com.example.chat95.data.ChatConversation;

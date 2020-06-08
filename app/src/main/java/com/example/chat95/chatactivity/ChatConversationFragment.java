@@ -85,7 +85,6 @@ public class ChatConversationFragment extends Fragment {
     private ValueEventListener approvedListener;
     private ValueEventListener messagesListener;
 
-
     public ChatConversationFragment() {
         // Required empty public constructor
     }
@@ -103,7 +102,6 @@ public class ChatConversationFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-
         //handle navigation components
         navController = Navigation.findNavController(view);
         AppBarConfiguration appBarConfiguration =
