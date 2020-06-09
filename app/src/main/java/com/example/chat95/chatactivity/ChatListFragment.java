@@ -102,18 +102,6 @@ public class ChatListFragment extends Fragment {
         binding.chatListRecycler.setLayoutManager(linearLayoutManager);
         binding.chatToolbar.getOverflowIcon().setColorFilter(Color.WHITE, PorterDuff.Mode.SRC_ATOP);
 
-/*
-        callingIntent = ChatActivity.callingIntent;
-        ChatActivity.callingIntent = null;
-        if (callingIntent != null && callingIntent.getStringExtra("chosenUid") != null) {
-            Bundle bundle = callingIntent.getExtras();
-*/
-/*            loggedUserId = intent.getStringExtra(ConstantValues.LOGGED_USER_ID);
-            chosenId = intent.getStringExtra("chosenUid");*//*
-
-            showChatConversation(bundle);
-        }else
-*/
         setListeners();
 
     }

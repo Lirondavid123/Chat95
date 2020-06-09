@@ -28,7 +28,10 @@ public class LocalDataBase {
                 ,foreignKey.getE()
                 ,foreignKey.getN(), isApproved));
     }
-
+    public static void deleteConversationDetails(String conversationId){
+        ConversationEntity conversationToDelete=myDAO.loadConversationData(conversationId);
+        myDAO.delete(conversationToDelete);
+    }
     public static AppDatabase getInstance() {
         return instance;
     }

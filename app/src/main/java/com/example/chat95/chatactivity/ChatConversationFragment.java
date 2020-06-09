@@ -51,6 +51,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.functions.FirebaseFunctions;
 
+import java.util.EventListener;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -109,8 +110,6 @@ public class ChatConversationFragment extends Fragment {
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getContext());
         binding.chatConversationRecyclerview.setLayoutManager(linearLayoutManager);
 
-// TODO: 28/05/2020 create appropriate cloud functions
-//        mFunctions = FirebaseFunctions.getInstance();
         setListeners();
     }
 
@@ -161,6 +160,7 @@ public class ChatConversationFragment extends Fragment {
             if (!isConversationTotallyApproved) {
                 updateLocalDB(chatConversation);
                 deleteKeysFromDB();
+                listenForMessages();
             } else {
                 Log.d(TAG, "getConversationDetails: conversation was fully approved");
                 updateCryptoConversationValues(conversationEntity.getSymmetricKey()
@@ -177,6 +177,24 @@ public class ChatConversationFragment extends Fragment {
                 setAprrovalListener();
             }
         }
+    }
+
+    private void listenForMessages() {
+        messagesListener=dbRef.child(ConstantValues.CHAT_MESSAGES)
+                .child(conversationId)
+                .addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        if(dataSnapshot.hasChildren()){
+                            displayMessagesList();
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                    }
+                });
     }
 
     private void setAprrovalListener() {
@@ -200,28 +218,6 @@ public class ChatConversationFragment extends Fragment {
 
                     }
                 });
-               /* .addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                        if ((Boolean) dataSnapshot.child(ConstantValues.APPROVED).getValue() == true) {
-                            Log.d(TAG, "onDataChange: user approved conversation");
-                            updateLocalDB(dataSnapshot.getValue(ChatConversation.class));
-
-                            deleteKeysFromDB();
-
-                            if (binding != null) {
-                                Log.d(TAG, "onDataChange: prepare database query after user approved");
-                                prepareUserInputField();
-                                prepareDatabaseQuery();
-                            }
-                        }
-                    }
-
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                    }
-                });*/
     }
 
     private void retrieveConversationFromDB() {
@@ -382,7 +378,6 @@ public class ChatConversationFragment extends Fragment {
         binding.startConversationBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-//                checkIfConversationExists();
                 Toast.makeText(getContext(), "New conversation request sent, waiting for other's side approval", Toast.LENGTH_LONG).show();
                 binding.startConversationBtn.setVisibility(View.GONE);
                 binding.chatUserInput.setVisibility(View.GONE);
@@ -413,7 +408,30 @@ public class ChatConversationFragment extends Fragment {
                         , privateKey.getD(), privateKey.getP(), privateKey.getQ(), symmetricKey, foreignPublicKey.getE(), foreignPublicKey.getN(), true));
 
                 updateDB(publicKey, KIC);
+                displayMessagesList();
 
+            }
+        });
+        binding.declineBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                LocalDataBase.deleteConversationDetails(conversationId);
+                HashMap childrenUpdates = new HashMap();
+
+                childrenUpdates.put(String.format("/%s/%s/%s",
+                        ConstantValues.CHAT_CONVERSATIONS
+                        , ChatActivity.getFireBaseAuth().getUid()
+                        , chosenUid)
+                        , null);
+                childrenUpdates.put(String.format("/%s/%s/%s",
+                        ConstantValues.CHAT_CONVERSATIONS
+                        ,chosenUid
+                        ,ChatActivity.getFireBaseAuth().getUid() )
+                        , null);
+                childrenUpdates.put(String.format("/%s/%s",
+                        ConstantValues.CHAT_MESSAGES,
+                        conversationId), null);
+                dbRef.updateChildren(childrenUpdates);
             }
         });
         binding.decryptSwtich.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -490,7 +508,6 @@ public class ChatConversationFragment extends Fragment {
             firebaseRecyclerAdapter.startListening();
             areThereAnyMessages = true;
         }
-//        final Map<String, Object> childUpdates = new HashMap<>();
         if (!doesConversationExist) {
             Log.d(TAG, "sendMessage: conversation does not exist");
             createNewConversationInDB();
@@ -568,10 +585,8 @@ public class ChatConversationFragment extends Fragment {
                 doesConversationExist = true;
                 Log.d(TAG, "onSuccess: setApprovalListener");
                 setAprrovalListener();
-//                        prepareDatabaseQuery();
             }
         });
-        // TODO: 02/06/2020 crypto, check if correct
         //save keys to local database
         LocalDataBase.InsertConversationData(new ConversationEntity(conversationId, publicKey.getE()
                 , publicKey.getN()
@@ -586,9 +601,7 @@ public class ChatConversationFragment extends Fragment {
         if (approvedListener != null) {
             dbRef.removeEventListener(approvedListener);
         }
-        if (messagesListener != null) {
-            dbRef.removeEventListener(messagesListener);
-        }
+
         FirebaseRecyclerOptions<ChatMessage> options = new FirebaseRecyclerOptions
                 .Builder<ChatMessage>()
                 .setQuery(chatMessagesRef, ChatMessage.class)
@@ -660,6 +673,9 @@ public class ChatConversationFragment extends Fragment {
     public void displayMessagesList() {
         firebaseRecyclerAdapter.startListening();
         if (firebaseRecyclerAdapter.getItemCount() >= 1)
+            if (messagesListener != null) {
+                dbRef.removeEventListener(messagesListener);
+            }
             binding.chatConversationRecyclerview.scrollToPosition(firebaseRecyclerAdapter.getItemCount() - 1);
     }
 
@@ -680,14 +696,6 @@ public class ChatConversationFragment extends Fragment {
             super(itemView);
             messageDate = itemView.findViewById(R.id.message_date);
             textMessageView = itemView.findViewById(R.id.textMessage);
-        }
-
-        public String getPlainText() {
-            return plainText;
-        }
-
-        public String getChipherText() {
-            return chipherText;
         }
     }
 
