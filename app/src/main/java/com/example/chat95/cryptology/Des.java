@@ -393,7 +393,7 @@ public class Des {
         IV=iv;    // first IV initialization
         String step3 = decryptRegularDes(step2,key1);
 
-        return convertHexToAscii(step3);
+        return convertHexToAscii(step3).trim();
     }
 
     public static void setIV(String IV) {

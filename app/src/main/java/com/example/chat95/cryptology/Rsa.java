@@ -27,13 +27,13 @@ public class Rsa {
         r = new Random();
         p = BigInteger.probablePrime(bitlength, r);
         q = BigInteger.probablePrime(bitlength, r);
-        N = p.multiply(q);
-        phi = p.subtract(BigInteger.ONE).multiply(q.subtract(BigInteger.ONE));
+        N = p.multiply(q);  // N=p*q
+        phi = p.subtract(BigInteger.ONE).multiply(q.subtract(BigInteger.ONE)); // phi = (p-1)(q-1)
         e = BigInteger.probablePrime(bitlength / 2, r);
         while (phi.gcd(e).compareTo(BigInteger.ONE) > 0 && e.compareTo(phi) < 0) {
             e.add(BigInteger.ONE);
         }
-        d = e.modInverse(phi);
+        d = e.modInverse(phi);    // calculate d so: d*e=1 mod(n)
     }
 
     public Rsa(BigInteger e, BigInteger d, BigInteger N) {
