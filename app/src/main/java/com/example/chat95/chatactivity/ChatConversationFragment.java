@@ -502,7 +502,7 @@ public class ChatConversationFragment extends Fragment {
 
 
     private void sendMessage() {
-        final String textMessage = binding.chatUserInput.getText().toString();
+        final String textMessage = binding.chatUserInput.getText().toString().trim();
         binding.chatUserInput.setText("");
         if (!areThereAnyMessages && firebaseRecyclerAdapter != null) {
             firebaseRecyclerAdapter.startListening();
@@ -523,7 +523,6 @@ public class ChatConversationFragment extends Fragment {
         // TODO: 02/06/2020 crypto, check if correct
         String cipherText = Des.encrypt(textMessage, symmetricKey);
         String signature = Rsa.signature(textMessage, privateKey);
-
 
         ChatMessage chatMessage = new ChatMessage(cipherText,
                 ChatActivity.getFireBaseAuth().getUid(),
