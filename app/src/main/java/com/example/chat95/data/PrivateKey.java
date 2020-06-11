@@ -40,6 +40,15 @@ public class PrivateKey {
         this.d = d;
     }
 
+    @Override
+    public String toString() {
+        return "PrivateKey{" +
+                "p='" + p + '\'' +
+                ", q='" + q + '\'' +
+                ", d='" + d + '\'' +
+                '}';
+    }
+
     public String getN() {
         BigInteger q = new BigInteger(this.q);
         BigInteger p = new BigInteger(this.p);

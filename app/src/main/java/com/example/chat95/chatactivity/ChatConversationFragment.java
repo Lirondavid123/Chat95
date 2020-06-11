@@ -51,7 +51,6 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.functions.FirebaseFunctions;
 
-import java.util.EventListener;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -61,6 +60,7 @@ import java.util.Map;
  */
 public class ChatConversationFragment extends Fragment {
     private static final String TAG = "ChatConversationFragment";
+
 
     private FragmentChatConversationBinding binding;
     private NavController navController;
@@ -73,12 +73,14 @@ public class ChatConversationFragment extends Fragment {
     private FirebaseRecyclerAdapter<ChatMessage, ChatMessageViewHolder> firebaseRecyclerAdapter;
     private boolean doesConversationExist;
     private String conversationId;
-    private FirebaseFunctions mFunctions;
-    private UsersViewModel mUsersViewModel;
 
+    private UsersViewModel mUsersViewModel;
+    //crypto
+    private static PublicKey publicKey;
     private static String symmetricKey;
     private static PrivateKey privateKey;
     private static PublicKey foreignPublicKey;
+    //listeners
     private DatabaseReference chatMessagesRef;
     private ValueEventListener approvedListener;
     private ValueEventListener messagesListener;
@@ -165,7 +167,7 @@ public class ChatConversationFragment extends Fragment {
                 Log.d(TAG, "getConversationDetails: conversation was fully approved");
                 updateCryptoConversationValues(conversationEntity.getSymmetricKey()
                         , new PublicKey(conversationEntity.getForeignE(), conversationEntity.getForeignN()),
-                        new PrivateKey(conversationEntity.getP(), conversationEntity.getQ(), conversationEntity.getD()));
+                        new PrivateKey(conversationEntity.getP(), conversationEntity.getQ(), conversationEntity.getD()),new PublicKey(conversationEntity.getMyE(),conversationEntity.getMyN()));
             }
 
         } else {
@@ -180,12 +182,12 @@ public class ChatConversationFragment extends Fragment {
     }
 
     private void listenForMessages() {
-        messagesListener=dbRef.child(ConstantValues.CHAT_MESSAGES)
+        messagesListener = dbRef.child(ConstantValues.CHAT_MESSAGES)
                 .child(conversationId)
                 .addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                        if(dataSnapshot.hasChildren()){
+                        if (dataSnapshot.hasChildren()) {
                             displayMessagesList();
                         }
                     }
@@ -282,13 +284,14 @@ public class ChatConversationFragment extends Fragment {
         symmetricKey = Rsa.decrypt(KIC, privateKey);
         //save the final conversation data to local database
         LocalDataBase.updateFinalConversationData(conversationId, foreignPublicKey, symmetricKey, true);
-        updateCryptoConversationValues(symmetricKey, foreignPublicKey, privateKey);
+        updateCryptoConversationValues(symmetricKey, foreignPublicKey, privateKey, new PublicKey(conversationEntity.getMyE(), conversationEntity.getMyN()));
     }
 
-    private void updateCryptoConversationValues(String symmetricKey, PublicKey foreignPublicKey, PrivateKey privateKey) {
+    private void updateCryptoConversationValues(String symmetricKey, PublicKey foreignPublicKey, PrivateKey privateKey, PublicKey publicKey) {
         ChatConversationFragment.symmetricKey = symmetricKey;
         ChatConversationFragment.foreignPublicKey = foreignPublicKey;
         ChatConversationFragment.privateKey = privateKey;
+        ChatConversationFragment.publicKey = publicKey;
         Log.d(TAG, String.format("updateCryptoConversationValues: symmetricKey = %s foreignPublicKey = %s  privateKey = %s", symmetricKey, foreignPublicKey, privateKey));
     }
 
@@ -406,7 +409,7 @@ public class ChatConversationFragment extends Fragment {
                 LocalDataBase.InsertConversationData(new ConversationEntity(conversationId, publicKey.getE()
                         , publicKey.getN()
                         , privateKey.getD(), privateKey.getP(), privateKey.getQ(), symmetricKey, foreignPublicKey.getE(), foreignPublicKey.getN(), true));
-
+                updateCryptoConversationValues(symmetricKey,foreignPublicKey,privateKey,publicKey);
                 updateDB(publicKey, KIC);
                 displayMessagesList();
 
@@ -425,8 +428,8 @@ public class ChatConversationFragment extends Fragment {
                         , null);
                 childrenUpdates.put(String.format("/%s/%s/%s",
                         ConstantValues.CHAT_CONVERSATIONS
-                        ,chosenUid
-                        ,ChatActivity.getFireBaseAuth().getUid() )
+                        , chosenUid
+                        , ChatActivity.getFireBaseAuth().getUid())
                         , null);
                 childrenUpdates.put(String.format("/%s/%s",
                         ConstantValues.CHAT_MESSAGES,
@@ -620,11 +623,20 @@ public class ChatConversationFragment extends Fragment {
                 if (!areThereAnyMessages) {
                     areThereAnyMessages = true;
                 }
+                // TODO: 11/06/2020 delete after it works //
+                Log.d(TAG, String.format("onBindViewHolder: symmetricKey = %s foreignPublicKey = %s  privateKey = %s", symmetricKey, foreignPublicKey, privateKey));
+                Log.d(TAG, String.format("onBindViewHolder: publicKeyN= %s ,privateKeyN= %s", publicKey.getN(), privateKey.getN()));
+                boolean nequals=publicKey.getN().equals(privateKey.getN());
+                Log.d(TAG, "onBindViewHolder: Nequals: "+nequals);
+                //
                 String plainText = Des.decrypt(model.getTextMessage(), symmetricKey);
                 holder.plainText = plainText;
                 holder.chipherText = model.getTextMessage();
                 Log.d(TAG, "onBindViewHolder: text message: " + plainText);
-                boolean isVerified = Rsa.verify(plainText, model.getSignature(), foreignPublicKey);
+                boolean isCurrentUserIsTheSender=model.getSenderId().equals(ChatActivity.getFireBaseAuth().getUid());
+                Log.d(TAG, "onBindViewHolder: isCurrentUserIsTheSender: "+isCurrentUserIsTheSender);
+                boolean isVerified =isCurrentUserIsTheSender? Rsa.verify(plainText, model.getSignature(), publicKey): Rsa.verify(plainText, model.getSignature(), foreignPublicKey);
+//                if (isCurrentUserIsTheSender || isVerified) {
                 if (isVerified) {
                     if (binding.decryptSwtich.isChecked()) {
                         holder.textMessageView.setText(plainText);
@@ -634,7 +646,7 @@ public class ChatConversationFragment extends Fragment {
                     holder.messageDate.setText(model.getTimeStamp());
 
                     Drawable background;
-                    if (model.getSenderId().equals(ChatActivity.getFireBaseAuth().getUid())) {
+                    if (isCurrentUserIsTheSender) {
                         background = getResources().getDrawable(R.drawable.message_form_blue);
                         holder.textMessageView.setLayoutDirection(View.LAYOUT_DIRECTION_RTL);
                     } else {
@@ -675,7 +687,7 @@ public class ChatConversationFragment extends Fragment {
             if (messagesListener != null) {
                 dbRef.removeEventListener(messagesListener);
             }
-            binding.chatConversationRecyclerview.scrollToPosition(firebaseRecyclerAdapter.getItemCount() - 1);
+        binding.chatConversationRecyclerview.scrollToPosition(firebaseRecyclerAdapter.getItemCount() - 1);
     }
 
     @Override
