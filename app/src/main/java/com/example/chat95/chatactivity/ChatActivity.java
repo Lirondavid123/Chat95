@@ -84,13 +84,13 @@ public class ChatActivity extends AppCompatActivity {
         //Log.d(TAG, "onStart: toHextString Test:  "+Long.toHexString());
 
 
-//        Keys keys = Rsa.createKeys();
-//        PrivateKey privateKey = keys.getPrivateKey();
-//        PublicKey publicKey = keys.getPublicKey();
+        Keys keys = Rsa.createKeys();
+        PrivateKey privateKey = keys.getPrivateKey();
+        PublicKey publicKey = keys.getPublicKey();
 //        Keys keys2 = Rsa.createKeys();
 //        PrivateKey privateKey2 = keys2.getPrivateKey();
 //        PublicKey publicKey2 = keys2.getPublicKey();
-//        String symmetricKey = KeyGenerator.generateKey(24);
+        String symmetricKey = "hii";//KeyGenerator.generateKey(24);
 //        Log.d(TAG, "onStart: symmetricKey: "+symmetricKey);
 //        String KIC = Rsa.encrypt(symmetricKey, publicKey);
 //        Log.d(TAG, "onStart: KIC: "+KIC);
@@ -104,12 +104,12 @@ public class ChatActivity extends AppCompatActivity {
 //        String expectedHashMessage = Rsa.decrypt(encryptedHash, publicKey);
 //        Log.d(TAG, "onStart: verify expectedHashMessage"+expectedHashMessage);
 
-//        String sign = Rsa.signature(symmetricKey, privateKey);
-//        if(Rsa.verify(symmetricKey, sign, publicKey)){
-//            Log.d(TAG, "onStart: Good");
-//        } else {
-//            Log.d(TAG, "onStart: Bad");
-//        }
+        String sign = Rsa.signature(symmetricKey, privateKey);
+        if(Rsa.verify(symmetricKey, sign, publicKey)){
+            Log.d(TAG, "onStart: Good");
+        } else {
+            Log.d(TAG, "onStart: Bad");
+        }
 
         LocalDataBase.setMyDAO(AppDatabase.getAppDatabase(getApplicationContext()).ConversationDAO());
 

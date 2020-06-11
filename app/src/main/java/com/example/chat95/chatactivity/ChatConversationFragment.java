@@ -57,6 +57,8 @@ import com.google.firebase.functions.HttpsCallableResult;
 import java.util.HashMap;
 import java.util.Map;
 
+import static android.content.ContentValues.TAG;
+
 
 /**
  * A simple {@link Fragment} subclass.
@@ -481,8 +483,12 @@ public class ChatConversationFragment extends Fragment {
 
         // TODO: 02/06/2020 crypto, check if correct
         String cipherText = Des.encrypt(textMessage, symmetricKey);
+        //Log.d(TAG, "onStart: addMessage symmetricKey "+symmetricKey);
+        Log.d(TAG, "onStart: addMessage textMessage "+textMessage);
+        Log.d(TAG, "onStart: addMessage cipherText "+cipherText);
         String signature = Rsa.signature(textMessage, privateKey);
-
+        //Log.d(TAG, "onStart: addMessage privateKey "+privateKey);
+        Log.d(TAG, "onStart: addMessage signature "+signature);
 
         ChatMessage chatMessage = new ChatMessage(cipherText,
                 ChatActivity.getFireBaseAuth().getUid(),
@@ -582,6 +588,10 @@ public class ChatConversationFragment extends Fragment {
             @Override
             protected void onBindViewHolder(@NonNull ChatMessageViewHolder holder, int position, @NonNull final ChatMessage model) {
                 String textMessage = Des.decrypt(model.getTextMessage(), symmetricKey);
+                //Log.d(TAG, "onStart: onBindViewHolder symmetricKey "+symmetricKey);
+                //Log.d(TAG, "onStart: onBindViewHolder model.getTextMessage() "+model.getTextMessage());
+                Log.d(TAG, "onStart: onBindViewHolder textMessage "+textMessage);
+                Log.d(TAG, "onStart: onBindViewHolder model.getSignature() "+model.getSignature());
                 boolean isVerified = Rsa.verify(textMessage, model.getSignature(), foreignPublicKey);
                 if (isVerified) {
                     holder.messageDate.setText(model.getTimeStamp());
