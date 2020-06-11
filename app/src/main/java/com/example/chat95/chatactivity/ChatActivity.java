@@ -15,6 +15,10 @@ import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 
 import com.example.chat95.R;
+import com.example.chat95.cryptology.Rsa;
+import com.example.chat95.data.Keys;
+import com.example.chat95.data.PrivateKey;
+import com.example.chat95.data.PublicKey;
 import com.example.chat95.data.User;
 import com.example.chat95.databinding.ActivityChatBinding;
 import com.example.chat95.login.LoginActivity;
@@ -66,6 +70,15 @@ public class ChatActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
+        // TODO: 11/06/2020 delete after it's working
+        String textMessage="hii";
+        Keys keys = Rsa.createKeys();
+        PublicKey publicKey = keys.getPublicKey();
+        PrivateKey privateKey= keys.getPrivateKey();
+        String signature = Rsa.signature(textMessage, privateKey);
+        boolean verify=Rsa.verify(textMessage,signature,publicKey);
+        Log.d(TAG, "onStart: verify is: "+verify);
+        //
 
         LocalDataBase.setMyDAO(AppDatabase.getAppDatabase(getApplicationContext()).ConversationDAO());
         if (fireBaseAuth.getCurrentUser() == null) {    // if the user is not logged in

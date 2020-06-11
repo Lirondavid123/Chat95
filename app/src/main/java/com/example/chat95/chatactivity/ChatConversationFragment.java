@@ -635,7 +635,9 @@ public class ChatConversationFragment extends Fragment {
                 Log.d(TAG, "onBindViewHolder: text message: " + plainText);
                 boolean isCurrentUserIsTheSender=model.getSenderId().equals(ChatActivity.getFireBaseAuth().getUid());
                 Log.d(TAG, "onBindViewHolder: isCurrentUserIsTheSender: "+isCurrentUserIsTheSender);
-                boolean isVerified =isCurrentUserIsTheSender? Rsa.verify(plainText, model.getSignature(), publicKey): Rsa.verify(plainText, model.getSignature(), foreignPublicKey);
+
+                boolean isVerified =isCurrentUserIsTheSender? Rsa.verify(plainText, model.getSignature(), publicKey)
+                        : Rsa.verify(plainText, model.getSignature(), foreignPublicKey);
 //                if (isCurrentUserIsTheSender || isVerified) {
                 if (isVerified) {
                     if (binding.decryptSwtich.isChecked()) {
