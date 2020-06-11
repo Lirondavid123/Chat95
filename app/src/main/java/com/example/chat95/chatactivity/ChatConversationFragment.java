@@ -526,6 +526,7 @@ public class ChatConversationFragment extends Fragment {
         // TODO: 02/06/2020 crypto, check if correct
         String cipherText = Des.encrypt(textMessage, symmetricKey);
         String signature = Rsa.signature(textMessage, privateKey);
+        Log.d(TAG, "onBindViewHolder: signature length "+signature);
 
         ChatMessage chatMessage = new ChatMessage(cipherText,
                 ChatActivity.getFireBaseAuth().getUid(),
@@ -635,9 +636,12 @@ public class ChatConversationFragment extends Fragment {
                 Log.d(TAG, "onBindViewHolder: text message: " + plainText);
                 boolean isCurrentUserIsTheSender=model.getSenderId().equals(ChatActivity.getFireBaseAuth().getUid());
                 Log.d(TAG, "onBindViewHolder: isCurrentUserIsTheSender: "+isCurrentUserIsTheSender);
-
+                Log.d(TAG, "onBindViewHolder: signature length "+model.getSignature().length());
                 boolean isVerified =isCurrentUserIsTheSender? Rsa.verify(plainText, model.getSignature(), publicKey)
                         : Rsa.verify(plainText, model.getSignature(), foreignPublicKey);
+
+
+                Log.d(TAG, "onBindViewHolder: isverified: "+isVerified);
 //                if (isCurrentUserIsTheSender || isVerified) {
                 if (isVerified) {
                     if (binding.decryptSwtich.isChecked()) {
