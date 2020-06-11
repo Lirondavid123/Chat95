@@ -49,7 +49,6 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.google.firebase.functions.FirebaseFunctions;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -167,7 +166,7 @@ public class ChatConversationFragment extends Fragment {
                 Log.d(TAG, "getConversationDetails: conversation was fully approved");
                 updateCryptoConversationValues(conversationEntity.getSymmetricKey()
                         , new PublicKey(conversationEntity.getForeignE(), conversationEntity.getForeignN()),
-                        new PrivateKey(conversationEntity.getP(), conversationEntity.getQ(), conversationEntity.getD()),new PublicKey(conversationEntity.getMyE(),conversationEntity.getMyN()));
+                        new PrivateKey(conversationEntity.getP(), conversationEntity.getQ(), conversationEntity.getD()), new PublicKey(conversationEntity.getMyE(), conversationEntity.getMyN()));
             }
 
         } else {
@@ -409,7 +408,7 @@ public class ChatConversationFragment extends Fragment {
                 LocalDataBase.InsertConversationData(new ConversationEntity(conversationId, publicKey.getE()
                         , publicKey.getN()
                         , privateKey.getD(), privateKey.getP(), privateKey.getQ(), symmetricKey, foreignPublicKey.getE(), foreignPublicKey.getN(), true));
-                updateCryptoConversationValues(symmetricKey,foreignPublicKey,privateKey,publicKey);
+                updateCryptoConversationValues(symmetricKey, foreignPublicKey, privateKey, publicKey);
                 updateDB(publicKey, KIC);
                 displayMessagesList();
 
@@ -526,7 +525,7 @@ public class ChatConversationFragment extends Fragment {
         // TODO: 02/06/2020 crypto, check if correct
         String cipherText = Des.encrypt(textMessage, symmetricKey);
         String signature = Rsa.signature(textMessage, privateKey);
-        Log.d(TAG, "onBindViewHolder: signature length "+signature);
+        Log.d(TAG, "onBindViewHolder: signature length " + signature);
 
         ChatMessage chatMessage = new ChatMessage(cipherText,
                 ChatActivity.getFireBaseAuth().getUid(),
@@ -627,21 +626,21 @@ public class ChatConversationFragment extends Fragment {
                 // TODO: 11/06/2020 delete after it works //
                 Log.d(TAG, String.format("onBindViewHolder: symmetricKey = %s foreignPublicKey = %s  privateKey = %s", symmetricKey, foreignPublicKey, privateKey));
                 Log.d(TAG, String.format("onBindViewHolder: publicKeyN= %s ,privateKeyN= %s", publicKey.getN(), privateKey.getN()));
-                boolean nequals=publicKey.getN().equals(privateKey.getN());
-                Log.d(TAG, "onBindViewHolder: Nequals: "+nequals);
+                boolean nequals = publicKey.getN().equals(privateKey.getN());
+                Log.d(TAG, "onBindViewHolder: Nequals: " + nequals);
                 //
                 String plainText = Des.decrypt(model.getTextMessage(), symmetricKey);
                 holder.plainText = plainText;
                 holder.chipherText = model.getTextMessage();
                 Log.d(TAG, "onBindViewHolder: text message: " + plainText);
-                boolean isCurrentUserIsTheSender=model.getSenderId().equals(ChatActivity.getFireBaseAuth().getUid());
-                Log.d(TAG, "onBindViewHolder: isCurrentUserIsTheSender: "+isCurrentUserIsTheSender);
-                Log.d(TAG, "onBindViewHolder: signature length "+model.getSignature().length());
-                boolean isVerified =isCurrentUserIsTheSender? Rsa.verify(plainText, model.getSignature(), publicKey)
+                boolean isCurrentUserIsTheSender = model.getSenderId().equals(ChatActivity.getFireBaseAuth().getUid());
+                Log.d(TAG, "onBindViewHolder: isCurrentUserIsTheSender: " + isCurrentUserIsTheSender);
+                Log.d(TAG, "onBindViewHolder: signature length " + model.getSignature().length());
+                boolean isVerified = isCurrentUserIsTheSender ? Rsa.verify(plainText, model.getSignature(), publicKey)
                         : Rsa.verify(plainText, model.getSignature(), foreignPublicKey);
 
 
-                Log.d(TAG, "onBindViewHolder: isverified: "+isVerified);
+                Log.d(TAG, "onBindViewHolder: isverified: " + isVerified);
 //                if (isCurrentUserIsTheSender || isVerified) {
                 if (isVerified) {
                     if (binding.decryptSwtich.isChecked()) {
@@ -688,7 +687,8 @@ public class ChatConversationFragment extends Fragment {
     }
 
     public void displayMessagesList() {
-        firebaseRecyclerAdapter.startListening();
+        if (firebaseRecyclerAdapter != null)
+            firebaseRecyclerAdapter.startListening();
         if (firebaseRecyclerAdapter.getItemCount() >= 1)
             if (messagesListener != null) {
                 dbRef.removeEventListener(messagesListener);
