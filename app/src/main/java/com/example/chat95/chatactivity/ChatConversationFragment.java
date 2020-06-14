@@ -200,10 +200,9 @@ public class ChatConversationFragment extends Fragment {
 
     private void setAprrovalListener() {
         approvedListener = dbRef.child(ConstantValues.CHAT_CONVERSATIONS)
-//        dbRef.child(ConstantValues.CHAT_CONVERSATIONS)
                 .child(ChatActivity.getFireBaseAuth().getUid())
-                .child(chosenUid).
-                        child(ConstantValues.APPROVED)
+                .child(chosenUid)
+                .child(ConstantValues.APPROVED)
                 .addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -396,9 +395,11 @@ public class ChatConversationFragment extends Fragment {
             public void onClick(View v) {
                 binding.declineBtn.setEnabled(false);
                 binding.approveBtn.setEnabled(false);
-                // TODO: 01/06/2020 crypto- replace temporary methods with real ones
+
                 foreignPublicKey = chosenChatConversation.getPublicKey();
                 symmetricKey = KeyGenerator.generateKey(48);
+                // TODO: 14/06/2020 eventually change to this one
+//                symmetricKey = KeyGenerator.generateKey(64);
                 String KIC = Rsa.encrypt(symmetricKey, foreignPublicKey);
 
                 Keys keys = Rsa.createKeys();
@@ -410,7 +411,7 @@ public class ChatConversationFragment extends Fragment {
                         , privateKey.getD(), privateKey.getP(), privateKey.getQ(), symmetricKey, foreignPublicKey.getE(), foreignPublicKey.getN(), true));
                 updateCryptoConversationValues(symmetricKey, foreignPublicKey, privateKey, publicKey);
                 updateDB(publicKey, KIC);
-                displayMessagesList();
+                prepareDatabaseQuery();
 
             }
         });
@@ -434,20 +435,27 @@ public class ChatConversationFragment extends Fragment {
                         ConstantValues.CHAT_MESSAGES,
                         conversationId), null);
                 dbRef.updateChildren(childrenUpdates);
+                Toast.makeText(getActivity(), "Declined conversation!", Toast.LENGTH_SHORT).show();
+                if (binding != null) {
+                    Navigation.findNavController(binding.getRoot()).popBackStack();
+                }
             }
         });
+
         binding.decryptSwtich.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if (firebaseRecyclerAdapter != null && firebaseRecyclerAdapter.getItemCount() != 0) {
                     ChatMessageViewHolder viewHolder;
                     for (int i = 0; i < firebaseRecyclerAdapter.getItemCount(); i++) {
-                        viewHolder = (ChatMessageViewHolder) binding.chatConversationRecyclerview.findViewHolderForAdapterPosition(i);
-                        assert viewHolder != null;
-                        if (isChecked) {
-                            viewHolder.textMessageView.setText(viewHolder.plainText);
-                        } else {
-                            viewHolder.textMessageView.setText(viewHolder.chipherText);
+                        viewHolder = (ChatMessageViewHolder) binding.chatConversationRecyclerview.findViewHolderForLayoutPosition(i);
+                        if (viewHolder != null) {
+                            if (isChecked) {
+                                viewHolder.textMessageView.setText(viewHolder.plainText);
+
+                            } else {
+                                viewHolder.textMessageView.setText(viewHolder.cipherText);
+                            }
                         }
                     }
                 }
@@ -507,7 +515,7 @@ public class ChatConversationFragment extends Fragment {
         final String textMessage = binding.chatUserInput.getText().toString().trim();
         binding.chatUserInput.setText("");
         if (!areThereAnyMessages && firebaseRecyclerAdapter != null) {
-            firebaseRecyclerAdapter.startListening();
+//            firebaseRecyclerAdapter.startListening();
             areThereAnyMessages = true;
         }
         if (!doesConversationExist) {
@@ -533,21 +541,17 @@ public class ChatConversationFragment extends Fragment {
                 DateUtils.getCurrentTimeString(), signature);
         //
 
-//                    firebaseRecyclerAdapter.getSnapshots().
-
+//
         DatabaseReference messageRef = dbRef.child(ConstantValues.CHAT_MESSAGES).child(conversationId).push();
 
         messageRef.setValue(chatMessage).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
-                if (firebaseRecyclerAdapter == null) {
+/*                if (firebaseRecyclerAdapter == null) {
                     prepareDatabaseQuery();
-                }
+                }*/
             }
         });
-        if (firebaseRecyclerAdapter != null) {
-            binding.chatConversationRecyclerview.scrollToPosition(firebaseRecyclerAdapter.getItemCount() - 1);
-        }
     }
 
     private void createNewConversationInDB() {
@@ -631,11 +635,13 @@ public class ChatConversationFragment extends Fragment {
                 //
                 String plainText = Des.decrypt(model.getTextMessage(), symmetricKey);
                 holder.plainText = plainText;
-                holder.chipherText = model.getTextMessage();
+                holder.cipherText = model.getTextMessage();
                 Log.d(TAG, "onBindViewHolder: text message: " + plainText);
                 boolean isCurrentUserIsTheSender = model.getSenderId().equals(ChatActivity.getFireBaseAuth().getUid());
                 Log.d(TAG, "onBindViewHolder: isCurrentUserIsTheSender: " + isCurrentUserIsTheSender);
                 Log.d(TAG, "onBindViewHolder: signature length " + model.getSignature().length());
+
+
                 boolean isVerified = isCurrentUserIsTheSender ? Rsa.verify(plainText, model.getSignature(), publicKey)
                         : Rsa.verify(plainText, model.getSignature(), foreignPublicKey);
 
@@ -669,7 +675,8 @@ public class ChatConversationFragment extends Fragment {
     }
 
     private void checkForMessages() {
-        chatMessagesRef.addListenerForSingleValueEvent(new ValueEventListener() {
+//        chatMessagesRef.addListenerForSingleValueEvent(new ValueEventListener() {
+        chatMessagesRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 if (!dataSnapshot.hasChildren()) {
@@ -687,18 +694,26 @@ public class ChatConversationFragment extends Fragment {
     }
 
     public void displayMessagesList() {
-        if (firebaseRecyclerAdapter != null)
+        if (firebaseRecyclerAdapter != null) {
             firebaseRecyclerAdapter.startListening();
-        if (firebaseRecyclerAdapter.getItemCount() >= 1)
-            if (messagesListener != null) {
-                dbRef.removeEventListener(messagesListener);
-            }
-        binding.chatConversationRecyclerview.scrollToPosition(firebaseRecyclerAdapter.getItemCount() - 1);
+            if (firebaseRecyclerAdapter.getItemCount() >= 1)
+                if (messagesListener != null) {
+                    dbRef.removeEventListener(messagesListener);
+                }
+        }
+        if (binding != null && firebaseRecyclerAdapter != null) {
+            binding.chatConversationRecyclerview.scrollToPosition(firebaseRecyclerAdapter.getItemCount() - 1);
+        }
     }
 
     @Override
     public void onDestroyView() {
         super.onDestroyView();
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
         chatViewModel.setChosenChatConversation(null);
         if (firebaseRecyclerAdapter != null)
             firebaseRecyclerAdapter.stopListening();
@@ -707,7 +722,7 @@ public class ChatConversationFragment extends Fragment {
 
     public static class ChatMessageViewHolder extends RecyclerView.ViewHolder {
         TextView messageDate, textMessageView;
-        private String plainText, chipherText;
+        private String plainText, cipherText;
 
         public ChatMessageViewHolder(@NonNull final View itemView) {
             super(itemView);

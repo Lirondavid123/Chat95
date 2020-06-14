@@ -3,14 +3,11 @@ package com.example.chat95.chatactivity;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -30,13 +27,11 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
-
-import com.example.chat95.cryptology.Des;
-import com.example.chat95.utils.ConstantValues;
 import com.example.chat95.R;
 import com.example.chat95.data.ChatConversation;
 import com.example.chat95.data.User;
 import com.example.chat95.databinding.FragmentChatListBinding;
+import com.example.chat95.utils.ConstantValues;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
 import com.google.firebase.database.DataSnapshot;
