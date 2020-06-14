@@ -397,9 +397,8 @@ public class ChatConversationFragment extends Fragment {
                 binding.approveBtn.setEnabled(false);
 
                 foreignPublicKey = chosenChatConversation.getPublicKey();
-                symmetricKey = KeyGenerator.generateKey(48);
-                // TODO: 14/06/2020 eventually change to this one
-//                symmetricKey = KeyGenerator.generateKey(64);
+
+                symmetricKey = KeyGenerator.generateKey(64);
                 String KIC = Rsa.encrypt(symmetricKey, foreignPublicKey);
 
                 Keys keys = Rsa.createKeys();

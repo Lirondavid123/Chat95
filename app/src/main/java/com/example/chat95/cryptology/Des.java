@@ -369,14 +369,15 @@ public class Des {
         // OUTPUT:  encryptedText in Hex
         String key1=symetricKey.substring(0,16);
         String key2=symetricKey.substring(16,32);
-        String iv=symetricKey.substring(32,48);
+        String key3=symetricKey.substring(32,48);
+        String iv=symetricKey.substring(48,64);
         String plainTextInHex= convertAsciiToHex(plainText);
         IV=iv;    // first IV initialization
         String step1 = encryptRegularDes(plainTextInHex,key1);
         IV=iv;    // first IV initialization
         String step2 = decryptRegularDes(step1,key2);
         IV=iv;    // first IV initialization
-        String step3 = encryptRegularDes(step2,key1);
+        String step3 = encryptRegularDes(step2,key3);
 
         return step3;
     }
@@ -385,9 +386,10 @@ public class Des {
         // OUTPUT:  plainText in ASCII
         String key1=symetricKey.substring(0,16);
         String key2=symetricKey.substring(16,32);
-        String iv=symetricKey.substring(32,48);
+        String key3=symetricKey.substring(32,48);
+        String iv=symetricKey.substring(48,64);
         IV=iv;    // first IV initialization
-        String step1 = decryptRegularDes(cipherText,key1);
+        String step1 = decryptRegularDes(cipherText,key3);
         IV=iv;    // first IV initialization
         String step2 = encryptRegularDes(step1,key2);
         IV=iv;    // first IV initialization
