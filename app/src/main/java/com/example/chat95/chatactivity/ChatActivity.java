@@ -3,9 +3,6 @@ package com.example.chat95.chatactivity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.ImageButton;
@@ -18,10 +15,10 @@ import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 
 import com.example.chat95.R;
-import com.example.chat95.cryptology.Des;
-import com.example.chat95.cryptology.KeyGenerator;
-import com.example.chat95.cryptology.TestDes;
-import com.example.chat95.cryptology.TextSplitter;
+import com.example.chat95.cryptology.Rsa;
+import com.example.chat95.data.Keys;
+import com.example.chat95.data.PrivateKey;
+import com.example.chat95.data.PublicKey;
 import com.example.chat95.data.User;
 import com.example.chat95.databinding.ActivityChatBinding;
 import com.example.chat95.login.LoginActivity;
@@ -33,8 +30,6 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-
-import java.util.List;
 
 
 public class ChatActivity extends AppCompatActivity {
@@ -61,8 +56,7 @@ public class ChatActivity extends AppCompatActivity {
         binding = ActivityChatBinding.inflate(getLayoutInflater());
         View view = binding.getRoot();
         setContentView(view);
-        callingIntent=getIntent();
-
+        callingIntent = getIntent();
 
         navController = Navigation.findNavController(this, R.id.chat_nav_host_fragment);
         AppBarConfiguration appBarConfiguration =
@@ -72,39 +66,27 @@ public class ChatActivity extends AppCompatActivity {
 
     }
 
-/*    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater menuInflater= getMenuInflater();
-        menuInflater.inflate(R.menu.menu,menu);
-        return true;
-    }*/
 
     @Override
     protected void onStart() {
         super.onStart();
-        //Log.d(TAG, "onStart: toHextString Test:  "+Long.toHexString());
-        LocalDataBase.setMyDAO(AppDatabase.getAppDatabase(getApplicationContext()).ConversationDAO());
-/*
-        String decrypted;
-        String resultText;
-        String text = "Encryption and Decryption with Triple Des, CBC mode, symetricKey!";
-        Log.d(TAG, "onStart: before encryption(in ascii): "+text);
-        String iv = "DFBA9910543698DC";
-        String key1 = "AABB09182736CCDD";
-        String key2 = "BBAC25672736ABE3";
-        //resultText=des.encrypt(text,key1,key2,iv);
-        resultText=Des.encrypt(text,key1+key2+iv);
-        Log.d(TAG, "onStart: encrypt: encryptedText (in hex): "+resultText);
-        decrypted=Des.decrypt(resultText,key1+key2+iv);
-        Log.d(TAG, "onStart: (triple)decryptedText: "+decrypted);
-*/
+        // TODO: 11/06/2020 delete after it's working
+        String textMessage="hii";
+        Keys keys = Rsa.createKeys();
+        PublicKey publicKey = keys.getPublicKey();
+        PrivateKey privateKey= keys.getPrivateKey();
+        String signature = Rsa.signature(textMessage, privateKey);
+        boolean verify=Rsa.verify(textMessage,signature,publicKey);
+        Log.d(TAG, "onStart: verify is: "+verify);
+        //
 
-        if (fireBaseAuth.getCurrentUser()== null) {    // if the user is not logged in
+        LocalDataBase.setMyDAO(AppDatabase.getAppDatabase(getApplicationContext()).ConversationDAO());
+        if (fireBaseAuth.getCurrentUser() == null) {    // if the user is not logged in
             sendUserToLogin();
         }
         //
         else {
-            search_users_button=findViewById(R.id.search_users_button);
+            search_users_button = findViewById(R.id.search_users_button);
             setListeners();
 
             currentUserDatabaseRef = FirebaseDatabase.getInstance().getReference().child("users").child(fireBaseAuth.getUid());
@@ -125,12 +107,13 @@ public class ChatActivity extends AppCompatActivity {
             });
         }
     }
-                public void sendUserToLogin() {
-                    Intent intent = new Intent(ChatActivity.this, LoginActivity.class);
-                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                    startActivity(intent);
-                    finish();
-                }
+
+    public void sendUserToLogin() {
+        Intent intent = new Intent(ChatActivity.this, LoginActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+        finish();
+    }
 
     @Override
     protected void onStop() {
@@ -139,6 +122,7 @@ public class ChatActivity extends AppCompatActivity {
             currentUserDatabaseRef.removeEventListener(userDetailsListener);
         }
     }
+
     public static User getLoggedUser() {
         return loggedUser;
     }
@@ -150,6 +134,7 @@ public class ChatActivity extends AppCompatActivity {
     public static void setUsersViewModel(UsersViewModel usersViewModel) {
         ChatActivity.usersViewModel = usersViewModel;
     }
+
     public static FirebaseAuth getFireBaseAuth() {
         return fireBaseAuth;
     }
@@ -158,7 +143,7 @@ public class ChatActivity extends AppCompatActivity {
         return currentUser;
     }
 
-    void setListeners(){
+    void setListeners() {
 /*        search_users_button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

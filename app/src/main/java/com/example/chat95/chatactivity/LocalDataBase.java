@@ -1,8 +1,11 @@
 package com.example.chat95.chatactivity;
 
+import android.util.Log;
+
 import com.example.chat95.data.PublicKey;
 
 public class LocalDataBase {
+    private static final String TAG = "LocalDataBase";
     public static AppDatabase instance;
     private static ConversationDAO myDAO;
 
@@ -18,6 +21,7 @@ public class LocalDataBase {
     public static void updateFinalConversationData(String conversationId, PublicKey foreignKey, String symmetricKey, boolean isApproved) {
         ConversationEntity oldConversationData=myDAO.loadConversationData(conversationId);
         myDAO.delete(oldConversationData);
+        Log.d(TAG, "updateFinalConversationData: oldConversationData: "+oldConversationData);
         myDAO.insert(new ConversationEntity(conversationId
                 ,oldConversationData.getMyE()
                 ,oldConversationData.getMyN()
@@ -28,7 +32,10 @@ public class LocalDataBase {
                 ,foreignKey.getE()
                 ,foreignKey.getN(), isApproved));
     }
-
+    public static void deleteConversationDetails(String conversationId){
+        ConversationEntity conversationToDelete=myDAO.loadConversationData(conversationId);
+        myDAO.delete(conversationToDelete);
+    }
     public static AppDatabase getInstance() {
         return instance;
     }

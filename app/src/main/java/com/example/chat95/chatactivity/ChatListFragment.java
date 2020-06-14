@@ -3,14 +3,11 @@ package com.example.chat95.chatactivity;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -30,13 +27,11 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
-
-import com.example.chat95.cryptology.Des;
-import com.example.chat95.utils.ConstantValues;
 import com.example.chat95.R;
 import com.example.chat95.data.ChatConversation;
 import com.example.chat95.data.User;
 import com.example.chat95.databinding.FragmentChatListBinding;
+import com.example.chat95.utils.ConstantValues;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
 import com.google.firebase.database.DataSnapshot;
@@ -102,18 +97,6 @@ public class ChatListFragment extends Fragment {
         binding.chatListRecycler.setLayoutManager(linearLayoutManager);
         binding.chatToolbar.getOverflowIcon().setColorFilter(Color.WHITE, PorterDuff.Mode.SRC_ATOP);
 
-/*
-        callingIntent = ChatActivity.callingIntent;
-        ChatActivity.callingIntent = null;
-        if (callingIntent != null && callingIntent.getStringExtra("chosenUid") != null) {
-            Bundle bundle = callingIntent.getExtras();
-*/
-/*            loggedUserId = intent.getStringExtra(ConstantValues.LOGGED_USER_ID);
-            chosenId = intent.getStringExtra("chosenUid");*//*
-
-            showChatConversation(bundle);
-        }else
-*/
         setListeners();
 
     }
@@ -150,7 +133,9 @@ public class ChatListFragment extends Fragment {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 if (!dataSnapshot.hasChildren()) {
-                    Toast.makeText(getContext(), "No chats to display yet...send some greetings to others!", Toast.LENGTH_LONG).show();
+                    if (binding != null && binding.chatListRecycler != null) {
+                        Toast.makeText(getContext(), "No chats to display yet...send some greetings to others!", Toast.LENGTH_LONG).show();
+                    }
 /*                    if (firebaseRecyclerAdapter != null) {
                         firebaseRecyclerAdapter.stopListening();
                     }*/

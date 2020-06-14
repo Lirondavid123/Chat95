@@ -126,6 +126,22 @@ public class ConversationEntity {
         return isApproved;
     }
 
+    @Override
+    public String toString() {
+        return "ConversationEntity{" +
+                "conversationId='" + conversationId + '\'' +
+                ", myE='" + myE + '\'' +
+                ", myN='" + myN + '\'' +
+                ", d='" + d + '\'' +
+                ", p='" + p + '\'' +
+                ", q='" + q + '\'' +
+                ", SymmetricKey='" + SymmetricKey + '\'' +
+                ", foreignE='" + foreignE + '\'' +
+                ", foreignN='" + foreignN + '\'' +
+                ", isApproved=" + isApproved +
+                '}';
+    }
+
     public void setApproved(boolean approved) {
         isApproved = approved;
     }
