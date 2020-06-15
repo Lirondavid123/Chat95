@@ -207,9 +207,11 @@ public class ChatConversationFragment extends Fragment {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                         Log.d(TAG, "onChildChanged: ");
-                        if ((Boolean) dataSnapshot.getValue()) {
-                            Log.d(TAG, "onChildChanged: before retrievedatafromDB");
-                            retrieveConversationFromDB();
+                        if (dataSnapshot.hasChildren()) {
+                            if ((Boolean) dataSnapshot.getValue()) {
+                                Log.d(TAG, "onChildChanged: before retrievedatafromDB");
+                                retrieveConversationFromDB();
+                            }
                         }
                     }
 
@@ -417,7 +419,6 @@ public class ChatConversationFragment extends Fragment {
         binding.declineBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                LocalDataBase.deleteConversationDetails(conversationId);
                 HashMap childrenUpdates = new HashMap();
 
                 childrenUpdates.put(String.format("/%s/%s/%s",
