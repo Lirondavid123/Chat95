@@ -1,6 +1,8 @@
 package com.example.chat95.chatactivity;
 
 
+import android.graphics.Color;
+import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.text.Editable;
@@ -9,6 +11,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CompoundButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -24,16 +27,20 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
-
-import com.example.chat95.utils.ConstantValues;
 import com.example.chat95.R;
+import com.example.chat95.cryptology.Des;
+import com.example.chat95.cryptology.KeyGenerator;
+import com.example.chat95.cryptology.Rsa;
 import com.example.chat95.data.ChatConversation;
 import com.example.chat95.data.ChatMessage;
+import com.example.chat95.data.Keys;
+import com.example.chat95.data.PrivateKey;
+import com.example.chat95.data.PublicKey;
 import com.example.chat95.databinding.FragmentChatConversationBinding;
+import com.example.chat95.utils.ConstantValues;
 import com.example.chat95.utils.DateUtils;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
-import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
@@ -41,10 +48,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
-import com.google.firebase.functions.FirebaseFunctions;
-import com.google.firebase.functions.HttpsCallableResult;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -55,6 +59,8 @@ import java.util.Map;
  */
 public class ChatConversationFragment extends Fragment {
     private static final String TAG = "ChatConversationFragment";
+
+
     private FragmentChatConversationBinding binding;
     private NavController navController;
     private String chosenUid;
@@ -64,10 +70,20 @@ public class ChatConversationFragment extends Fragment {
     private ChatConversation chosenChatConversation;
     private ChatViewModel chatViewModel;
     private FirebaseRecyclerAdapter<ChatMessage, ChatMessageViewHolder> firebaseRecyclerAdapter;
-    private boolean isConversationExists;
+    private boolean doesConversationExist;
     private String conversationId;
-    private FirebaseFunctions mFunctions;
 
+    private UsersViewModel mUsersViewModel;
+    //crypto
+    private static PublicKey publicKey;
+    private static String symmetricKey;
+    private static PrivateKey privateKey;
+    private static PublicKey foreignPublicKey;
+    //listeners
+    private DatabaseReference chatMessagesRef;
+    private ValueEventListener approvedListener;
+    private ValueEventListener messagesListener;
+    private boolean areThereAnyMessages;
 
     public ChatConversationFragment() {
         // Required empty public constructor
@@ -86,7 +102,6 @@ public class ChatConversationFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-
         //handle navigation components
         navController = Navigation.findNavController(view);
         AppBarConfiguration appBarConfiguration =
@@ -96,7 +111,6 @@ public class ChatConversationFragment extends Fragment {
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getContext());
         binding.chatConversationRecyclerview.setLayoutManager(linearLayoutManager);
 
-        mFunctions = FirebaseFunctions.getInstance();
         setListeners();
     }
 
@@ -104,64 +118,205 @@ public class ChatConversationFragment extends Fragment {
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        chatViewModel = ViewModelProviders.of(getActivity()).get(ChatViewModel.class);
-        getConversationDetails();
-    }
-
-    private void getConversationDetails() {
-        Bundle bundle;
-        bundle = getArguments();
         dbRef = FirebaseDatabase.getInstance().getReference();
-        //conversation was chosen from main activity
-//        if (bundle != null) {
-        if (bundle != null && chatViewModel.getChosenChatConversation().getValue() == null) {
-            Log.d(TAG, "getConversationDetails: bundel is not null");
-            chosenUid = bundle.getString("chosenUid", null);
+        chatViewModel = ViewModelProviders.of(getActivity()).get(ChatViewModel.class);
+        mUsersViewModel = ViewModelProviders.of(getActivity()).get(UsersViewModel.class);
+        chosenUid = mUsersViewModel.getUserId();
+        photoUrl = mUsersViewModel.getChosenPhotoUrl();
+        userName = mUsersViewModel.getUserName();
+        initToolBar();
+        binding.chatToolbar.getOverflowIcon().setColorFilter(Color.WHITE, PorterDuff.Mode.SRC_ATOP);
+        Bundle bundle = getArguments();
 
-
-            DatabaseReference userPhotoRef = dbRef
-                    .child(ConstantValues.USERS)
-                    .child(chosenUid);
-            userPhotoRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                    photoUrl = (String) dataSnapshot.child(ConstantValues.PROFILE_PHOTO).getValue();
-                    userName = String.format("%s %s",
-                            dataSnapshot.child(ConstantValues.USER_FIRST_NAME).getValue().toString(), dataSnapshot.child(ConstantValues.USER_LAST_NAME).getValue().toString());
-                    initToolBar();
-                    checkIfConversationExists();
-                }
-
-                @Override
-                public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                }
-            });
-            //conversation was chosen from conversations list, the view model is initialized
+        if (!bundle.getBoolean("doesConversationExist")) {
+            //user seleceted this conversation with search option,conversation might not exist
+            doesConversationExist = false;
+            checkIfConversationExists();
         } else {
-            Log.d(TAG, "getConversationDetails: bundel is null");
-            Boolean isConversationApproved;
-            String sender;
-
-
-            chosenChatConversation = chatViewModel.getChosenChatConversation().getValue();
-            chosenUid = chosenChatConversation.getChosenUid();
-            conversationId = chosenChatConversation.getChatId();
-            userName = chosenChatConversation.getUserName();
-            photoUrl = chosenChatConversation.getReceiverProfilePicture();
-            isConversationApproved = chosenChatConversation.isApproved();
-            setConversationApproval(isConversationApproved, chosenUid);
-            initToolBar();
-            prepareDatabaseQuery();
+            //user selected this conversation in the chat list, conversation exists
+            doesConversationExist = true;
+            getConversationDetails(chatViewModel.getChosenChatConversation().getValue());
         }
     }
 
+
+    /**
+     * called when there is a certain existing conversation,that has been approved or not yet, by two users
+     * isConversationPartiallyApproved- indicates if the conversation was approved by one user
+     * isConversationTotallyApproved- indicates if the conversation was approved by both of the users, with emphasize on local storage
+     *
+     * @param chatConversation
+     */
+    private void getConversationDetails(ChatConversation chatConversation) {
+        Boolean isConversationPartiallyApproved, isConversationTotallyApproved;
+        chosenChatConversation = chatConversation;
+        conversationId = chosenChatConversation.getConversationId();
+
+        isConversationPartiallyApproved = chosenChatConversation.getApproved();
+        if (isConversationPartiallyApproved) {
+            Log.d(TAG, "getConversationDetails: conversation was partially approved");
+            prepareDatabaseQuery();
+            ConversationEntity conversationEntity = LocalDataBase.retrieveConversationData(conversationId);
+            isConversationTotallyApproved = conversationEntity.isApproved();
+            if (!isConversationTotallyApproved) {
+                updateLocalDB(chatConversation);
+                deleteKeysFromDB();
+                listenForMessages();
+            } else {
+                Log.d(TAG, "getConversationDetails: conversation was fully approved");
+                updateCryptoConversationValues(conversationEntity.getSymmetricKey()
+                        , new PublicKey(conversationEntity.getForeignE(), conversationEntity.getForeignN()),
+                        new PrivateKey(conversationEntity.getP(), conversationEntity.getQ(), conversationEntity.getD()), new PublicKey(conversationEntity.getMyE(), conversationEntity.getMyN()));
+            }
+
+        } else {
+            Log.d(TAG, "getConversationDetails: conversation is not approved");
+            setConversationApproval(isConversationPartiallyApproved, chosenChatConversation.getSender());
+            //if this user is the sender, wait for the other user's approval
+            if (chosenChatConversation.getSender().equals(ChatActivity.getFireBaseAuth().getUid())) {
+                Log.d(TAG, "getConversationDetails: set approval listener");
+                setAprrovalListener();
+            }
+        }
+    }
+
+    private void listenForMessages() {
+        messagesListener = dbRef.child(ConstantValues.CHAT_MESSAGES)
+                .child(conversationId)
+                .addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        if (dataSnapshot.hasChildren()) {
+                            displayMessagesList();
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                    }
+                });
+    }
+
+    private void setAprrovalListener() {
+        approvedListener = dbRef.child(ConstantValues.CHAT_CONVERSATIONS)
+                .child(ChatActivity.getFireBaseAuth().getUid())
+                .child(chosenUid)
+                .child(ConstantValues.APPROVED)
+                .addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        Log.d(TAG, "onChildChanged: ");
+                        if (dataSnapshot.hasChildren()) {
+                            if ((Boolean) dataSnapshot.getValue()) {
+                                Log.d(TAG, "onChildChanged: before retrievedatafromDB");
+                                retrieveConversationFromDB();
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                    }
+                });
+    }
+
+    private void retrieveConversationFromDB() {
+        dbRef.child(ConstantValues.CHAT_CONVERSATIONS)
+                .child(ChatActivity.getFireBaseAuth().getUid())
+                .child(chosenUid).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if ((Boolean) dataSnapshot.child(ConstantValues.APPROVED).getValue() == true) {
+                    Log.d(TAG, "onDataChange: user approved conversation");
+                    updateLocalDB(dataSnapshot.getValue(ChatConversation.class));
+                    deleteKeysFromDB();
+
+                    if (binding != null) {
+                        Log.d(TAG, "onDataChange: prepare database query after user approved");
+                        prepareUserInputField();
+                        prepareDatabaseQuery();
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    private void deleteKeysFromDB() {
+        //delete keys from firebase database
+        HashMap childUpdates = new HashMap();
+        childUpdates.put(String.format("/%s/%s/%s/%s",
+                ConstantValues.CHAT_CONVERSATIONS
+                , ChatActivity.getFireBaseAuth().getUid()
+                , chosenUid, "publicKey")
+                , null);
+        childUpdates.put(String.format("/%s/%s/%s/%s",
+                ConstantValues.CHAT_CONVERSATIONS
+                , chosenUid
+                , ChatActivity.getFireBaseAuth().getUid(), "publicKey")
+                , null);
+        childUpdates.put(String.format("/%s/%s/%s/%s",
+                ConstantValues.CHAT_CONVERSATIONS
+                , chosenUid
+                , ChatActivity.getFireBaseAuth().getUid(), "kic")
+                , null);
+
+        childUpdates.put(String.format("/%s/%s/%s/%s",
+                ConstantValues.CHAT_CONVERSATIONS
+                , ChatActivity.getFireBaseAuth().getUid()
+                , chosenUid, "kic")
+                , null);
+        dbRef.updateChildren(childUpdates);
+    }
+
+    private void updateLocalDB(ChatConversation chatConversation) {
+        String KIC = chatConversation.getKic();
+        PublicKey foreignPublicKey = chatConversation.getPublicKey();
+        String symmetricKey;
+        ConversationEntity conversationEntity = LocalDataBase.retrieveConversationData(conversationId);
+        PrivateKey privateKey = new PrivateKey(conversationEntity.getP(), conversationEntity.getQ(), conversationEntity.getD());
+        symmetricKey = Rsa.decrypt(KIC, privateKey);
+        //save the final conversation data to local database
+        LocalDataBase.updateFinalConversationData(conversationId, foreignPublicKey, symmetricKey, true);
+        updateCryptoConversationValues(symmetricKey, foreignPublicKey, privateKey, new PublicKey(conversationEntity.getMyE(), conversationEntity.getMyN()));
+    }
+
+    private void updateCryptoConversationValues(String symmetricKey, PublicKey foreignPublicKey, PrivateKey privateKey, PublicKey publicKey) {
+        ChatConversationFragment.symmetricKey = symmetricKey;
+        ChatConversationFragment.foreignPublicKey = foreignPublicKey;
+        ChatConversationFragment.privateKey = privateKey;
+        ChatConversationFragment.publicKey = publicKey;
+        Log.d(TAG, String.format("updateCryptoConversationValues: symmetricKey = %s foreignPublicKey = %s  privateKey = %s", symmetricKey, foreignPublicKey, privateKey));
+    }
+
+
+    private void prepareUserInputField() {
+        binding.chatUserInput.setVisibility(View.VISIBLE);
+        binding.chatConversationRecyclerview.setVisibility(View.VISIBLE);
+        binding.approveMessageLayout.setVisibility(View.GONE);
+    }
+
+    private void setStartConversationButton() {
+        binding.chatUserInput.setVisibility(View.GONE);
+        binding.startConversationBtn.setVisibility(View.VISIBLE);
+    }
+
     private void setConversationApproval(Boolean isConversationApproved, String sender) {
-        if (!isConversationApproved && sender.equals(chosenUid)) {
+        //the user needs to approve/decline the conversation
+        if (!isConversationApproved) {
             binding.chatUserInput.setVisibility(View.GONE);
             binding.approveMessageLayout.setVisibility(View.VISIBLE);
-        } else if (!isConversationApproved) {
-            // TODO: 21/05/2020
+            if (!sender.equals(chosenUid)) {
+                binding.approveBtn.setVisibility(View.GONE);
+                binding.declineBtn.setVisibility(View.GONE);
+                binding.infoAboutConversationApproval.setText("Waiting for the other side's approval");
+            }
         }
     }
 
@@ -171,15 +326,16 @@ public class ChatConversationFragment extends Fragment {
         userConversationRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                //conversation does not exist
                 if (!dataSnapshot.hasChild(chosenUid)) {
-                    isConversationExists = false;
-                } else {
-                    isConversationExists = true;
-                    Boolean isConversationApproved = (Boolean) dataSnapshot.child(chosenUid).child(ConstantValues.APPROVED).getValue();
-                    String sender = (String) dataSnapshot.child(chosenUid).child("sender").getValue();
-                    setConversationApproval(isConversationApproved, sender);
-                    conversationId = (String) dataSnapshot.child(chosenUid).child(ConstantValues.CHAT_ID).getValue();
-                    prepareDatabaseQuery();
+                    Log.d(TAG, "onDataChange: conversation does not exist");
+                    doesConversationExist = false;
+                    setStartConversationButton();
+                } //conversation exists
+                else {
+                    doesConversationExist = true;
+                    Log.d(TAG, "onDataChange: conversation exist, conversation id: " + dataSnapshot.child(chosenUid).getValue(ChatConversation.class).getConversationId());
+                    getConversationDetails(dataSnapshot.child(chosenUid).getValue(ChatConversation.class));
                 }
             }
 
@@ -222,160 +378,236 @@ public class ChatConversationFragment extends Fragment {
                 sendMessage();
             }
         });
+        binding.startConversationBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(getContext(), "New conversation request sent, waiting for other's side approval", Toast.LENGTH_LONG).show();
+                binding.startConversationBtn.setVisibility(View.GONE);
+                binding.chatUserInput.setVisibility(View.GONE);
+                binding.approveBtn.setVisibility(View.GONE);
+                binding.declineBtn.setVisibility(View.GONE);
+                binding.infoAboutConversationApproval.setText("Waiting for the other side's approval");
+                binding.approveMessageLayout.setVisibility(View.VISIBLE);
+                createNewConversationInDB();
+            }
+        });
+
         binding.approveBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 binding.declineBtn.setEnabled(false);
                 binding.approveBtn.setEnabled(false);
-                approveChatConversation().addOnCompleteListener(new OnCompleteListener<String>() {
-                    @Override
-                    public void onComplete(@NonNull Task<String> task) {
-                        if (task.isSuccessful()) {
-                            binding.approveMessageLayout.setVisibility(View.GONE);
-                            binding.chatUserInput.setVisibility(View.VISIBLE);
-                            binding.chatConversationSendBtn.setVisibility(View.VISIBLE);
-                            Toast.makeText(getActivity(), "Conversation Approved! There's nothing like a fresh new conversation...", Toast.LENGTH_LONG).show();
-                        } else {
-                            String errorMessage = task.getException().getMessage();
-                            Log.d(TAG, "onComplete: task not succeful approving conversation " + errorMessage);
-                            Toast.makeText(getActivity(), "sorry something went bad...try again later", Toast.LENGTH_LONG).show();
-                            binding.approveBtn.setEnabled(true);
-                            binding.declineBtn.setEnabled(true);
+
+                foreignPublicKey = chosenChatConversation.getPublicKey();
+
+                symmetricKey = KeyGenerator.generateKey(64);
+                String KIC = Rsa.encrypt(symmetricKey, foreignPublicKey);
+
+                Keys keys = Rsa.createKeys();
+                privateKey = keys.getPrivateKey();
+                PublicKey publicKey = keys.getPublicKey();
+                //save keys to local database
+                LocalDataBase.InsertConversationData(new ConversationEntity(conversationId, publicKey.getE()
+                        , publicKey.getN()
+                        , privateKey.getD(), privateKey.getP(), privateKey.getQ(), symmetricKey, foreignPublicKey.getE(), foreignPublicKey.getN(), true));
+                updateCryptoConversationValues(symmetricKey, foreignPublicKey, privateKey, publicKey);
+                updateDB(publicKey, KIC);
+                prepareDatabaseQuery();
+
+            }
+        });
+        binding.declineBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                HashMap childrenUpdates = new HashMap();
+
+                childrenUpdates.put(String.format("/%s/%s/%s",
+                        ConstantValues.CHAT_CONVERSATIONS
+                        , ChatActivity.getFireBaseAuth().getUid()
+                        , chosenUid)
+                        , null);
+                childrenUpdates.put(String.format("/%s/%s/%s",
+                        ConstantValues.CHAT_CONVERSATIONS
+                        , chosenUid
+                        , ChatActivity.getFireBaseAuth().getUid())
+                        , null);
+                childrenUpdates.put(String.format("/%s/%s",
+                        ConstantValues.CHAT_MESSAGES,
+                        conversationId), null);
+                dbRef.updateChildren(childrenUpdates);
+                Toast.makeText(getActivity(), "Declined conversation!", Toast.LENGTH_SHORT).show();
+                if (binding != null) {
+                    Navigation.findNavController(binding.getRoot()).popBackStack();
+                }
+            }
+        });
+
+        binding.decryptSwtich.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (firebaseRecyclerAdapter != null && firebaseRecyclerAdapter.getItemCount() != 0) {
+                    ChatMessageViewHolder viewHolder;
+                    for (int i = 0; i < firebaseRecyclerAdapter.getItemCount(); i++) {
+                        viewHolder = (ChatMessageViewHolder) binding.chatConversationRecyclerview.findViewHolderForLayoutPosition(i);
+                        if (viewHolder != null) {
+                            if (isChecked) {
+                                viewHolder.textMessageView.setText(viewHolder.plainText);
+
+                            } else {
+                                viewHolder.textMessageView.setText(viewHolder.cipherText);
+                            }
                         }
                     }
-                });
+                }
             }
         });
     }
 
-    private Task<String> approveChatConversation() {
-
-        // Create the arguments to the callable function.
-        Map<String, Object> data = new HashMap<>();
-        data.put("sender", chosenUid);
-        data.put("senderName", userName);
-        data.put("receiverName", ChatActivity.getLoggedUser().getUserFullName());
-
-        return mFunctions
-                .getHttpsCallable("approveChatConversation")
-                .call(data)
-                .continueWith(new Continuation<HttpsCallableResult, String>() {
-                    @Override
-                    public String then(@NonNull Task<HttpsCallableResult> task) throws Exception {
-                        // This continuation runs on either success or failure, but if the task
-                        // has failed then getResult() will throw an Exception which will be
-                        // propagated down.
-                        String result = (String) task.getResult().getData();
-                        return result;
-                    }
-                });
+    private void updateDB(PublicKey publicKey, String KIC) {
+        HashMap childUpdates = new HashMap();
+        childUpdates.put(String.format("/%s/%s/%s/%s",
+                ConstantValues.CHAT_CONVERSATIONS
+                , ChatActivity.getFireBaseAuth().getUid()
+                , chosenUid, "publicKey")
+                , publicKey);
+        childUpdates.put(String.format("/%s/%s/%s/%s",
+                ConstantValues.CHAT_CONVERSATIONS
+                , ChatActivity.getFireBaseAuth().getUid()
+                , chosenUid, "kic")
+                , KIC);
+        childUpdates.put(String.format("/%s/%s/%s/%s",
+                ConstantValues.CHAT_CONVERSATIONS
+                , chosenUid
+                , ChatActivity.getFireBaseAuth().getUid(), "kic")
+                , KIC);
+        childUpdates.put(String.format("/%s/%s/%s/%s",
+                ConstantValues.CHAT_CONVERSATIONS
+                , chosenUid
+                , ChatActivity.getFireBaseAuth().getUid(), "publicKey")
+                , publicKey);
+        childUpdates.put(String.format("/%s/%s/%s/%s",
+                ConstantValues.CHAT_CONVERSATIONS
+                , ChatActivity.getFireBaseAuth().getUid()
+                , chosenUid, ConstantValues.APPROVED)
+                , true);
+        childUpdates.put(String.format("/%s/%s/%s/%s",
+                ConstantValues.CHAT_CONVERSATIONS
+                , chosenUid
+                , ChatActivity.getFireBaseAuth().getUid(), ConstantValues.APPROVED)
+                , true);
+        dbRef = FirebaseDatabase.getInstance().getReference();
+        dbRef.updateChildren(childUpdates).addOnCompleteListener(new OnCompleteListener() {
+            @Override
+            public void onComplete(@NonNull Task task) {
+                Toast.makeText(getContext(), "Conversation has been approved! say hi to your new pal", Toast.LENGTH_SHORT).show();
+                if (binding != null) {
+                    binding.approveMessageLayout.setVisibility(View.GONE);
+                    binding.chatUserInput.setVisibility(View.VISIBLE);
+                    binding.chatConversationSendBtn.setVisibility(View.VISIBLE);
+                    checkForMessages();
+                }
+            }
+        });
     }
 
-    private void sendMessage() {
-        final String textMessage = binding.chatUserInput.getText().toString();
-        binding.chatUserInput.setText("");
 
-        final Map<String, Object> childUpdates = new HashMap<>();
-        if (chosenChatConversation == null) {
-            if (!isConversationExists) {
-                Log.d(TAG, "sendMessage: conversation does not exist");
-                createNewConversationInDB(childUpdates, textMessage);
-            } else {
-                Log.d(TAG, "sendMessage: conversation exists");
-                addMessage(textMessage, conversationId);
-            }
+    private void sendMessage() {
+        final String textMessage = binding.chatUserInput.getText().toString().trim();
+        binding.chatUserInput.setText("");
+        if (!areThereAnyMessages && firebaseRecyclerAdapter != null) {
+//            firebaseRecyclerAdapter.startListening();
+            areThereAnyMessages = true;
+        }
+        if (!doesConversationExist) {
+            Log.d(TAG, "sendMessage: conversation does not exist");
+            createNewConversationInDB();
         } else {
-            addMessage(textMessage, chosenChatConversation.getChatId());
+            Log.d(TAG, "sendMessage: conversation exists");
+
+            addMessage(textMessage, chosenChatConversation.getConversationId());
         }
     }
 
     private void addMessage(String textMessage, String conversationId) {
-        ChatMessage chatMessage = new ChatMessage(textMessage,
+
+        // TODO: 02/06/2020 crypto, check if correct
+        String cipherText = Des.encrypt(textMessage, symmetricKey);
+        String signature = Rsa.signature(textMessage, privateKey);
+        Log.d(TAG, "onBindViewHolder: signature length " + signature);
+
+        ChatMessage chatMessage = new ChatMessage(cipherText,
                 ChatActivity.getFireBaseAuth().getUid(),
                 chosenUid,
-                DateUtils.getCurrentTimeString());
+                DateUtils.getCurrentTimeString(), signature);
+        //
+
+//
         DatabaseReference messageRef = dbRef.child(ConstantValues.CHAT_MESSAGES).child(conversationId).push();
 
-        messageRef.setValue(chatMessage);
-        binding.chatConversationRecyclerview.scrollToPosition(firebaseRecyclerAdapter.getItemCount() - 1);
-    }
-
-    private void createNewConversationInDB(final Map<String, Object> childUpdates, String textMessage) {
-        dbRef = FirebaseDatabase.getInstance().getReference();
-        conversationId = dbRef.child(ConstantValues.CHAT_MESSAGES).push().getKey();
-        String newMessageId = dbRef.child(ConstantValues.CHAT_MESSAGES).child(conversationId).push().getKey();
-
-        ChatMessage chatMessage = new ChatMessage(textMessage,
-                ChatActivity.getLoggedUser().getUserId(),
-                chosenUid,
-                DateUtils.getCurrentTimeString());
-        String userName = String.format("%s %s", ChatActivity.getLoggedUser().getUserFirstName(), ChatActivity.getLoggedUser().getUserLastName());
-        chosenChatConversation = new ChatConversation(conversationId,
-                ChatActivity.getLoggedUser().getUserId(),
-                chosenUid,
-                ChatActivity.getLoggedUser().getProfileImage(), false, userName, ChatActivity.getCurrentUser().getUid());
-        chatViewModel.setChosenChatConversation(chosenChatConversation);
-
-        childUpdates.put(String.format("/%s/%s/%s", ConstantValues.CHAT_MESSAGES, conversationId, newMessageId), chatMessage);
-        childUpdates.put(String.format("/%s/%s/%s", ConstantValues.CHAT_CONVERSATIONS, chosenUid, ChatActivity.getCurrentUser().getUid()), chosenChatConversation);
-        DatabaseReference userPhotoRef = dbRef
-                .child(ConstantValues.USERS)
-                .child(chosenUid);
-        userPhotoRef.addListenerForSingleValueEvent(new ValueEventListener() {
+        messageRef.setValue(chatMessage).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                String photoUrl = (String) dataSnapshot.child(ConstantValues.PROFILE_PHOTO).getValue();
-                String userName = String.format("%s %s", dataSnapshot.child(ConstantValues.USER_FIRST_NAME).getValue(), dataSnapshot.child(ConstantValues.USER_LAST_NAME).getValue());
-
-                ChatConversation chatConversation = new ChatConversation(conversationId,
-                        ChatActivity.getLoggedUser().getUserId(),
-                        chosenUid,
-                        photoUrl, false, userName, chosenUid);
-                childUpdates.put(String.format("/%s/%s/%s",
-                        ConstantValues.CHAT_CONVERSATIONS
-                        , ChatActivity.getCurrentUser().getUid()
-                        , chosenUid)
-                        , chatConversation);
-                dbRef.updateChildren(childUpdates).addOnSuccessListener(new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void aVoid) {
-                        prepareDatabaseQuery();
-                    }
-                });
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
+            public void onComplete(@NonNull Task<Void> task) {
+/*                if (firebaseRecyclerAdapter == null) {
+                    prepareDatabaseQuery();
+                }*/
             }
         });
+    }
+
+    private void createNewConversationInDB() {
+        final Map<String, Object> childUpdates = new HashMap<>();
+        dbRef = FirebaseDatabase.getInstance().getReference();
+        conversationId = dbRef.child(ConstantValues.CHAT_MESSAGES).push().getKey();
+
+        // TODO: 02/06/2020 crypto, check if correct
+        Keys keys = Rsa.createKeys();
+        PrivateKey privateKey = keys.getPrivateKey();
+        PublicKey publicKey = keys.getPublicKey();
+        //
+        chosenChatConversation = new ChatConversation(publicKey, conversationId,
+                ChatActivity.getFireBaseAuth().getUid(),
+                chosenUid,
+                ChatActivity.getLoggedUser().getProfileImage(),
+                false,
+                ChatActivity.getLoggedUser().getUserFullName(),
+                ChatActivity.getFireBaseAuth().getUid(), "");
+
+        childUpdates.put(String.format("/%s/%s/%s", ConstantValues.CHAT_CONVERSATIONS, chosenUid, ChatActivity.getCurrentUser().getUid()), chosenChatConversation);
+
+        ChatConversation chatConversation = new ChatConversation(publicKey, conversationId,
+                ChatActivity.getLoggedUser().getUserId(),
+                chosenUid,
+                photoUrl, false, userName, chosenUid, "");
+        chatViewModel.setChosenChatConversation(chatConversation);
+
+        childUpdates.put(String.format("/%s/%s/%s",
+                ConstantValues.CHAT_CONVERSATIONS
+                , ChatActivity.getCurrentUser().getUid()
+                , chosenUid)
+                , chatConversation);
+        dbRef.updateChildren(childUpdates).addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void aVoid) {
+                doesConversationExist = true;
+                Log.d(TAG, "onSuccess: setApprovalListener");
+                setAprrovalListener();
+            }
+        });
+        //save keys to local database
+        LocalDataBase.InsertConversationData(new ConversationEntity(conversationId, publicKey.getE()
+                , publicKey.getN()
+                , privateKey.getD(), privateKey.getP(), privateKey.getQ(), null, null, null, false));
+        //
     }
 
     private void prepareDatabaseQuery() {
-        final Query chatMessagesRef = FirebaseDatabase.getInstance().getReference()
+
+        chatMessagesRef = FirebaseDatabase.getInstance().getReference()
                 .child(ConstantValues.CHAT_MESSAGES).child(conversationId);
+        if (approvedListener != null) {
+            dbRef.removeEventListener(approvedListener);
+        }
 
-        chatMessagesRef.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                if (!dataSnapshot.hasChildren()) {
-                    Toast.makeText(getContext(), "No messages to display.", Toast.LENGTH_LONG).show();
-                    if (firebaseRecyclerAdapter != null) {
-                        firebaseRecyclerAdapter.stopListening();
-                    }
-                } else {
-                    displayMessagesList(binding.chatConversationRecyclerview, chatMessagesRef);
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        });
-    }
-
-    public void displayMessagesList(final RecyclerView chatMessagesRecyclerView, Query chatMessagesRef) {
         FirebaseRecyclerOptions<ChatMessage> options = new FirebaseRecyclerOptions
                 .Builder<ChatMessage>()
                 .setQuery(chatMessagesRef, ChatMessage.class)
@@ -392,30 +624,96 @@ public class ChatConversationFragment extends Fragment {
 
             @Override
             protected void onBindViewHolder(@NonNull ChatMessageViewHolder holder, int position, @NonNull final ChatMessage model) {
-
-                holder.messageDate.setText(model.getTimeStamp());
-                holder.textMessage.setText(model.getTextMessage());
-                Drawable background;
-                if (model.getSenderId().equals(ChatActivity.getFireBaseAuth().getUid())) {
-                    background = getResources().getDrawable(R.drawable.message_form_blue);
-                    holder.textMessage.setLayoutDirection(View.LAYOUT_DIRECTION_RTL);
-                } else {
-                    background = getResources().getDrawable(R.drawable.message_form_grey);
-                    holder.textMessage.setLayoutDirection(View.LAYOUT_DIRECTION_LTR);
+                if (!areThereAnyMessages) {
+                    areThereAnyMessages = true;
                 }
-                holder.textMessage.setBackground(background);
+                // TODO: 11/06/2020 delete after it works //
+                Log.d(TAG, String.format("onBindViewHolder: symmetricKey = %s foreignPublicKey = %s  privateKey = %s", symmetricKey, foreignPublicKey, privateKey));
+                Log.d(TAG, String.format("onBindViewHolder: publicKeyN= %s ,privateKeyN= %s", publicKey.getN(), privateKey.getN()));
+                boolean nequals = publicKey.getN().equals(privateKey.getN());
+                Log.d(TAG, "onBindViewHolder: Nequals: " + nequals);
+                //
+                String plainText = Des.decrypt(model.getTextMessage(), symmetricKey);
+                holder.plainText = plainText;
+                holder.cipherText = model.getTextMessage();
+                Log.d(TAG, "onBindViewHolder: text message: " + plainText);
+                boolean isCurrentUserIsTheSender = model.getSenderId().equals(ChatActivity.getFireBaseAuth().getUid());
+                Log.d(TAG, "onBindViewHolder: isCurrentUserIsTheSender: " + isCurrentUserIsTheSender);
+                Log.d(TAG, "onBindViewHolder: signature length " + model.getSignature().length());
+
+
+                boolean isVerified = isCurrentUserIsTheSender ? Rsa.verify(plainText, model.getSignature(), publicKey)
+                        : Rsa.verify(plainText, model.getSignature(), foreignPublicKey);
+
+
+                Log.d(TAG, "onBindViewHolder: isverified: " + isVerified);
+//                if (isCurrentUserIsTheSender || isVerified) {
+                if (isVerified) {
+                    if (binding.decryptSwtich.isChecked()) {
+                        holder.textMessageView.setText(plainText);
+                    } else {
+                        holder.textMessageView.setText(model.getTextMessage());
+                    }
+                    holder.messageDate.setText(model.getTimeStamp());
+
+                    Drawable background;
+                    if (isCurrentUserIsTheSender) {
+                        background = getResources().getDrawable(R.drawable.message_form_blue);
+                        holder.textMessageView.setLayoutDirection(View.LAYOUT_DIRECTION_RTL);
+                    } else {
+                        background = getResources().getDrawable(R.drawable.message_form_grey);
+                        holder.textMessageView.setLayoutDirection(View.LAYOUT_DIRECTION_LTR);
+                    }
+                    holder.textMessageView.setBackground(background);
+                } else {
+                    weAreAngry();
+                }
+            }
+        };
+        binding.chatConversationRecyclerview.setAdapter(firebaseRecyclerAdapter);
+        checkForMessages();
+    }
+
+    private void checkForMessages() {
+//        chatMessagesRef.addListenerForSingleValueEvent(new ValueEventListener() {
+        chatMessagesRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (!dataSnapshot.hasChildren()) {
+                    Toast.makeText(getContext(), "No messages to display.", Toast.LENGTH_LONG).show();
+                } else {
+                    displayMessagesList();
+                }
             }
 
-        };
-        chatMessagesRecyclerView.setAdapter(firebaseRecyclerAdapter);
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
 
-        firebaseRecyclerAdapter.startListening();
-        chatMessagesRecyclerView.scrollToPosition(firebaseRecyclerAdapter.getItemCount() - 1);
+            }
+        });
+    }
+
+    public void displayMessagesList() {
+        if (firebaseRecyclerAdapter != null) {
+            firebaseRecyclerAdapter.startListening();
+            if (firebaseRecyclerAdapter.getItemCount() >= 1)
+                if (messagesListener != null) {
+                    dbRef.removeEventListener(messagesListener);
+                }
+        }
+        if (binding != null && firebaseRecyclerAdapter != null) {
+            binding.chatConversationRecyclerview.scrollToPosition(firebaseRecyclerAdapter.getItemCount() - 1);
+        }
     }
 
     @Override
     public void onDestroyView() {
         super.onDestroyView();
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
         chatViewModel.setChosenChatConversation(null);
         if (firebaseRecyclerAdapter != null)
             firebaseRecyclerAdapter.stopListening();
@@ -423,13 +721,25 @@ public class ChatConversationFragment extends Fragment {
     }
 
     public static class ChatMessageViewHolder extends RecyclerView.ViewHolder {
-        TextView messageDate, textMessage;
+        TextView messageDate, textMessageView;
+        private String plainText, cipherText;
 
         public ChatMessageViewHolder(@NonNull final View itemView) {
             super(itemView);
             messageDate = itemView.findViewById(R.id.message_date);
-            textMessage = itemView.findViewById(R.id.textMessage);
+            textMessageView = itemView.findViewById(R.id.textMessage);
         }
     }
 
+    private void weAreAngry() {
+        Toast.makeText(getContext(), "Conversation was hacked!!!", Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        if (dbRef != null && approvedListener != null) {
+//            dbRef.removeEventListener(approvedListener);
+        }
+    }
 }

@@ -29,6 +29,7 @@ import java.util.List;
 
 public class RegisterFragment extends Fragment {
     private static final RegisterFragment registerFragment = new RegisterFragment();
+    private View view;
 
     public static RegisterFragment getInstance() {
         return registerFragment;
@@ -58,7 +59,8 @@ public class RegisterFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_register, container, false);
+        view = inflater.inflate(R.layout.fragment_register, container, false);
+        return view;
     }
 
     @Override
@@ -83,27 +85,36 @@ public class RegisterFragment extends Fragment {
 
 
     private class ClickListener implements View.OnClickListener {
-        public void onClick(View view) {
-            switch (view.getId()) {
+        public void onClick(final View v) {
+            switch (v.getId()) {
                 case R.id.clearFieldsRegister:
                     clearFields();
                     break;
                 case R.id.createAccount:
+
                     if (checkFields()) {
+                        progressDialog.show();
+                        createAccount.setEnabled(false);
                         firebaseAuth.createUserWithEmailAndPassword(email.getText().toString(), password.getText().toString()).
                                 addOnCompleteListener(new OnCompleteListener<AuthResult>() {
                                     @Override
                                     public void onComplete(@NonNull Task<AuthResult> task) {
                                         if (task.isSuccessful()) {
-                                            progressDialog.show();
                                             String userID = task.getResult().getUser().getUid();
                                             saveUserDetails(userID);
                                         } else {
                                             String errorMessage = task.getException().getMessage();
+                                            if (view != null) {
+                                                progressDialog.dismiss();
+                                                createAccount.setEnabled(true);
+                                            }
                                             Toast.makeText(getActivity(), "Could not register: " + errorMessage, Toast.LENGTH_LONG).show();
 
                                         }
+
                                     }
+
+
                                 });
                     }
                     break;
@@ -126,13 +137,23 @@ public class RegisterFragment extends Fragment {
             @Override
             public void onComplete(@NonNull Task task) {
                 if (task.isSuccessful()) {
+                    if (getActivity() != null) {
+                        Toast.makeText(getActivity(), "Registered successfully\nWelcome!", Toast.LENGTH_LONG).show();
+                    }
+                    if (view != null) {
+                        progressDialog.dismiss();
+                        getFragmentManager().popBackStack();
+                    }
 
-                    progressDialog.dismiss();
-                    Toast.makeText(getActivity(), "Registered successfully", Toast.LENGTH_SHORT).show();
-                    getFragmentManager().popBackStack();
                 } else {
                     String errorMessage = task.getException().getMessage();
-                    Toast.makeText(getActivity(), "Could not fill details: " + errorMessage, Toast.LENGTH_LONG).show();
+                    if (getActivity() != null) {
+                        Toast.makeText(getActivity(), "Could not fill details: " + errorMessage, Toast.LENGTH_LONG).show();
+                    }
+                    if(view!=null){
+                        progressDialog.dismiss();
+                    }
+                    createAccount.setEnabled(true);
                 }
             }
         });

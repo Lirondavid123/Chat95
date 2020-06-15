@@ -7,16 +7,28 @@
 
     <fragment
         android:id="@+id/chatListFragment"
-        android:name="com.example.besocial.ui.chatactivity.ChatListFragment"
+        android:name="com.example.chat95.chatactivity.ChatListFragment"
         android:label="Chats list"
         tools:layout="@layout/fragment_chat_list" >
         <action
             android:id="@+id/action_chatListFragment_to_chatConversationFragment"
             app:destination="@id/chatConversationFragment" />
+        <action
+            android:id="@+id/action_chatListFragment_to_searchUsersFragment"
+            app:destination="@id/searchUsersFragment" />
     </fragment>
     <fragment
         android:id="@+id/chatConversationFragment"
-        android:name="com.example.besocial.ui.chatactivity.ChatConversationFragment"
+        android:name="com.example.chat95.chatactivity.ChatConversationFragment"
         android:label="fragment_chat_conversation"
         tools:layout="@layout/fragment_chat_conversation" />
+    <fragment
+        android:id="@+id/searchUsersFragment"
+        android:name="com.example.chat95.chatactivity.SearchUsersFragment"
+        android:label="fragment_search_users"
+        tools:layout="@layout/fragment_search_users" />
+    <dialog
+        android:id="@+id/logoutDialog"
+        android:name="com.example.chat95.chatactivity.LogoutDialog"
+        android:label="LogoutDialog" />
 </navigation>

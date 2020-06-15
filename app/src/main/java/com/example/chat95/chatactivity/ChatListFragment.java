@@ -3,9 +3,12 @@ package com.example.chat95.chatactivity;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.PorterDuff;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -24,12 +27,11 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
-
-import com.example.chat95.utils.ConstantValues;
 import com.example.chat95.R;
 import com.example.chat95.data.ChatConversation;
 import com.example.chat95.data.User;
 import com.example.chat95.databinding.FragmentChatListBinding;
+import com.example.chat95.utils.ConstantValues;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
 import com.google.firebase.database.DataSnapshot;
@@ -48,7 +50,7 @@ public class ChatListFragment extends Fragment {
     private static String TAG = "ChatListFragment";
 
     private FragmentChatListBinding binding;
-    private static UsersViewModel mViewModel;
+    private static UsersViewModel usersViewModel;
     private RecyclerView chatListRecycler;
     private Query query;
     private User loggedUser;
@@ -66,6 +68,10 @@ public class ChatListFragment extends Fragment {
         // Required empty public constructor
     }
 
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -89,41 +95,55 @@ public class ChatListFragment extends Fragment {
 
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getContext());
         binding.chatListRecycler.setLayoutManager(linearLayoutManager);
+        binding.chatToolbar.getOverflowIcon().setColorFilter(Color.WHITE, PorterDuff.Mode.SRC_ATOP);
 
-        callingIntent = ChatActivity.callingIntent;
-        ChatActivity.callingIntent = null;
-        if (callingIntent != null && callingIntent.getStringExtra("chosenUid") != null) {
-            Bundle bundle = callingIntent.getExtras();
-/*            loggedUserId = intent.getStringExtra(ConstantValues.LOGGED_USER_ID);
-            chosenId = intent.getStringExtra("chosenUid");*/
-            showChatConversation(bundle);
-        }else prepareDatabaseQuery();
+        setListeners();
 
+    }
+
+    private void setListeners() {
+        binding.chatToolbar.getMenu().getItem(0).setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                navController.navigate(R.id.logoutDialog);
+                return false;
+            }
+        });
+        binding.searchUsersButton.setOnClickListener(Navigation.createNavigateOnClickListener(R.id.action_chatListFragment_to_searchUsersFragment));
     }
 
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         chatViewModel = ViewModelProviders.of(getActivity()).get(ChatViewModel.class);
+        usersViewModel = ViewModelProviders.of(getActivity()).get(UsersViewModel.class);
     }
+
 
     private void showChatConversation(Bundle bundle) {
         Navigation.findNavController(getView()).navigate(R.id.action_chatListFragment_to_chatConversationFragment, bundle);
     }
+
     private void prepareDatabaseQuery() {
         final Query conversationsRef = FirebaseDatabase.getInstance().getReference()
                 .child(ConstantValues.CHAT_CONVERSATIONS).child(ChatActivity.getFireBaseAuth().getUid());
-
-        conversationsRef.addListenerForSingleValueEvent(new ValueEventListener() {
+// TODO: 01/06/2020 edit the real time factor 
+//         conversationsListener = conversationsRef.addListenerForSingleValueEvent(new ValueEventListener() {
+        conversationsRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 if (!dataSnapshot.hasChildren()) {
-                    Toast.makeText(getContext(), "No chats to display yet...send some greetings to others!", Toast.LENGTH_LONG).show();
-                    if (firebaseRecyclerAdapter != null) {
-                        firebaseRecyclerAdapter.stopListening();
+                    if (binding != null && binding.chatListRecycler != null) {
+                        Toast.makeText(getContext(), "No chats to display yet...send some greetings to others!", Toast.LENGTH_LONG).show();
                     }
+/*                    if (firebaseRecyclerAdapter != null) {
+                        firebaseRecyclerAdapter.stopListening();
+                    }*/
                 } else {
-                    displayConversationsList(binding.chatListRecycler, conversationsRef);
+                    conversationsRef.removeEventListener(this);
+                    if (binding != null && binding.chatListRecycler != null) {
+                        displayConversationsList(binding.chatListRecycler, conversationsRef);
+                    }
                 }
             }
 
@@ -159,7 +179,12 @@ public class ChatListFragment extends Fragment {
                     @Override
                     public void onClick(View v) {
                         chatViewModel.setChosenChatConversation(model);
-                        Navigation.findNavController(getView()).navigate(R.id.action_chatListFragment_to_chatConversationFragment);
+                        usersViewModel.setUserId(model.getChosenUid());
+                        usersViewModel.setChosenPhotoUrl(model.getReceiverProfilePicture());
+                        usersViewModel.setUserName(model.getUserName());
+                        Bundle bundle = new Bundle();
+                        bundle.putBoolean("doesConversationExist", true);
+                        Navigation.findNavController(getView()).navigate(R.id.action_chatListFragment_to_chatConversationFragment, bundle);
                     }
                 });
             }
@@ -208,6 +233,13 @@ public class ChatListFragment extends Fragment {
     public void onStart() {
         super.onStart();
         Log.d(TAG, "onStart: ");
+
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        prepareDatabaseQuery();
     }
 
     @Override
@@ -215,6 +247,14 @@ public class ChatListFragment extends Fragment {
         super.onStop();
         Log.d(TAG, "onStop: ");
         callingIntent = null;
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        if(firebaseRecyclerAdapter!=null){
+            firebaseRecyclerAdapter.stopListening();
+        }
     }
 
     @Override

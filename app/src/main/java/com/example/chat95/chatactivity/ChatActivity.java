@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.ImageButton;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -14,9 +15,14 @@ import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 
 import com.example.chat95.R;
+import com.example.chat95.cryptology.Rsa;
+import com.example.chat95.data.Keys;
+import com.example.chat95.data.PrivateKey;
+import com.example.chat95.data.PublicKey;
 import com.example.chat95.data.User;
 import com.example.chat95.databinding.ActivityChatBinding;
 import com.example.chat95.login.LoginActivity;
+import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -35,36 +41,53 @@ public class ChatActivity extends AppCompatActivity {
     private static FirebaseUser currentUser;
     public static Intent callingIntent;
     private ValueEventListener userDetailsListener;
-    private static UsersViewModel mViewModel;
+    private static UsersViewModel usersViewModel;
     private static FirebaseAuth fireBaseAuth;
- 
+    private ImageButton search_users_button;
+    private ChatViewModel mChatViewModel;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        FirebaseApp.initializeApp(this);
         fireBaseAuth = FirebaseAuth.getInstance();
         currentUser = fireBaseAuth.getCurrentUser();
         binding = ActivityChatBinding.inflate(getLayoutInflater());
         View view = binding.getRoot();
         setContentView(view);
-        callingIntent=getIntent();
+        callingIntent = getIntent();
 
         navController = Navigation.findNavController(this, R.id.chat_nav_host_fragment);
         AppBarConfiguration appBarConfiguration =
                 new AppBarConfiguration.Builder(navController.getGraph()).build();
-        mViewModel = ViewModelProviders.of(this).get(UsersViewModel.class);
+        usersViewModel = ViewModelProviders.of(this).get(UsersViewModel.class);
+        mChatViewModel = ViewModelProviders.of(this).get(ChatViewModel.class);
+
     }
 
 
     @Override
     protected void onStart() {
         super.onStart();
-        Log.d(TAG, "inside on Start");
-        if (fireBaseAuth.getCurrentUser()== null) {    // if the user is not logged in
+        // TODO: 11/06/2020 delete after it's working
+        String textMessage="hii";
+        Keys keys = Rsa.createKeys();
+        PublicKey publicKey = keys.getPublicKey();
+        PrivateKey privateKey= keys.getPrivateKey();
+        String signature = Rsa.signature(textMessage, privateKey);
+        boolean verify=Rsa.verify(textMessage,signature,publicKey);
+        Log.d(TAG, "onStart: verify is: "+verify);
+        //
+
+        LocalDataBase.setMyDAO(AppDatabase.getAppDatabase(getApplicationContext()).ConversationDAO());
+        if (fireBaseAuth.getCurrentUser() == null) {    // if the user is not logged in
             sendUserToLogin();
         }
         //
         else {
+            search_users_button = findViewById(R.id.search_users_button);
+            setListeners();
 
             currentUserDatabaseRef = FirebaseDatabase.getInstance().getReference().child("users").child(fireBaseAuth.getUid());
 
@@ -72,9 +95,8 @@ public class ChatActivity extends AppCompatActivity {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                     loggedUser = dataSnapshot.getValue(User.class);
-                    mViewModel.setUser(loggedUser);
+                    usersViewModel.setUser(loggedUser);
                     String myProfileImage = loggedUser.getProfileImage();
-                    loggedUser = dataSnapshot.getValue(User.class);
                 }
 
                 @Override
@@ -85,12 +107,13 @@ public class ChatActivity extends AppCompatActivity {
             });
         }
     }
-                public void sendUserToLogin() {
-                    Intent intent = new Intent(ChatActivity.this, LoginActivity.class);
-                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                    startActivity(intent);
-                    finish();
-                }
+
+    public void sendUserToLogin() {
+        Intent intent = new Intent(ChatActivity.this, LoginActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+        finish();
+    }
 
     @Override
     protected void onStop() {
@@ -99,17 +122,19 @@ public class ChatActivity extends AppCompatActivity {
             currentUserDatabaseRef.removeEventListener(userDetailsListener);
         }
     }
+
     public static User getLoggedUser() {
         return loggedUser;
     }
 
-    public static UsersViewModel getmViewModel() {
-        return mViewModel;
+    public static UsersViewModel getUsersViewModel() {
+        return usersViewModel;
     }
 
-    public static void setmViewModel(UsersViewModel mViewModel) {
-        ChatActivity.mViewModel = mViewModel;
+    public static void setUsersViewModel(UsersViewModel usersViewModel) {
+        ChatActivity.usersViewModel = usersViewModel;
     }
+
     public static FirebaseAuth getFireBaseAuth() {
         return fireBaseAuth;
     }
@@ -117,4 +142,15 @@ public class ChatActivity extends AppCompatActivity {
     public static FirebaseUser getCurrentUser() {
         return currentUser;
     }
+
+    void setListeners() {
+/*        search_users_button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                navController.navigate(R.id.action_chatListFragment_to_searchUsersFragment);
+            }
+        });*/
+    }
+
+
 }

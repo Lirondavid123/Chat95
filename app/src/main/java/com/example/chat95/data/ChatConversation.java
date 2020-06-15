@@ -1,33 +1,63 @@
 package com.example.chat95.data;
 
 public class ChatConversation {
-    private String chatId;
+    private PublicKey publicKey;
+    private String conversationId;
     private String userName;
     private String chosenUid;
-    private String sender,receiver;
+    private String sender, receiver;
     private String receiverProfilePicture;
-    private boolean isApproved;
+    private Boolean isApproved;
+    private String kic;
 
-    public ChatConversation(){
+    public ChatConversation() {
 
     }
 
-    public ChatConversation(String chatId, String sender, String receiver, String sentToProfilePicture, boolean isApproved,String userName, String chosenUid) {
-        this.chatId = chatId;
+    public ChatConversation(PublicKey publicKey, String conversationId,
+                            String sender, String receiver, String sentToProfilePicture, Boolean isApproved,
+                            String userName, String chosenUid, String kic) {
+        this.publicKey = publicKey;
+        this.conversationId = conversationId;
         this.sender = sender;
         this.receiver = receiver;
         this.receiverProfilePicture = sentToProfilePicture;
         this.isApproved = isApproved;
-        this.userName=userName;
-        this.chosenUid=chosenUid;
+        this.userName = userName;
+        this.chosenUid = chosenUid;
+        this.kic = kic;
     }
 
-    public String getChatId() {
-        return chatId;
+    public PublicKey getPublicKey() {
+        return publicKey;
     }
 
-    public void setChatId(String chatId) {
-        this.chatId = chatId;
+    public void setPublicKey(PublicKey publicKey) {
+        this.publicKey = publicKey;
+    }
+
+    public String getConversationId() {
+        return conversationId;
+    }
+
+    public void setConversationId(String conversationId) {
+        this.conversationId = conversationId;
+    }
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
+
+    public String getChosenUid() {
+        return chosenUid;
+    }
+
+    public void setChosenUid(String chosenUid) {
+        this.chosenUid = chosenUid;
     }
 
     public String getSender() {
@@ -54,28 +84,20 @@ public class ChatConversation {
         this.receiverProfilePicture = receiverProfilePicture;
     }
 
-    public boolean isApproved() {
+    public Boolean getApproved() {
         return isApproved;
     }
 
-    public void setApproved(boolean approved) {
+    public void setApproved(Boolean approved) {
         isApproved = approved;
     }
 
-    public String getUserName() {
-        return userName;
+    public String getKic() {
+        return kic;
     }
 
-    public void setUserName(String userName) {
-        this.userName = userName;
-    }
-
-    public String getChosenUid() {
-        return chosenUid;
-    }
-
-    public void setChosenUid(String chosenUid) {
-        this.chosenUid = chosenUid;
+    public void setKic(String kic) {
+        this.kic = kic;
     }
 }
 
