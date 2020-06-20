@@ -6,8 +6,6 @@ import android.util.Log;
 import com.example.chat95.data.Keys;
 import com.example.chat95.data.PrivateKey;
 import com.example.chat95.data.PublicKey;
-import com.google.common.hash.Hashing;
-
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.nio.charset.Charset;
