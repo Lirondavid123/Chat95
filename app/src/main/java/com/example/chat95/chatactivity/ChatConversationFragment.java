@@ -533,22 +533,17 @@ public class ChatConversationFragment extends Fragment {
         // TODO: 02/06/2020 crypto, check if correct
         String cipherText = Des.encrypt(textMessage, symmetricKey);
 
-        String cipherTextTEMP = Des.encrypt(textMessage+" liron david", symmetricKey);
+       // String cipherTextTEMP = Des.encrypt(textMessage+" liron david", symmetricKey);
 
         String signature = Rsa.signature(textMessage, privateKey);
         Log.d(TAG, "onBindViewHolder: signature length " + signature);
 
 
-        ChatMessage chatMessage = new ChatMessage(cipherTextTEMP,
+        ChatMessage chatMessage = new ChatMessage(cipherText,
                 ChatActivity.getFireBaseAuth().getUid(),
                 chosenUid,
                 DateUtils.getCurrentTimeString(), signature);
 
-       /* ChatMessage chatMessage = new ChatMessage(cipherText,
-                ChatActivity.getFireBaseAuth().getUid(),
-                chosenUid,
-                DateUtils.getCurrentTimeString(), signature);*/
-        //
 
 //
         DatabaseReference messageRef = dbRef.child(ConstantValues.CHAT_MESSAGES).child(conversationId).push();
